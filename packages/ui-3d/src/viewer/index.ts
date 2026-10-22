@@ -38,6 +38,7 @@ export {
   levelFor,
   pixelsPerSecond,
   devicePixelsPerFrame,
+  pixelBudgetFor,
   maxSustainedFps,
   governorFrameBudgetMs,
   FRAME_RATES,

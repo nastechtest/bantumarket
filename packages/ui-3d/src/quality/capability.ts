@@ -86,4 +86,21 @@ export function devicePixelRatioCap(cap: Capability): number {
   return 2;
 }
 
+/**
+ * Fraction of `sceneTokens.maxPixelsPerSecondBudget` this device may spend on continuous repaint.
+ *
+ * GPU signals only — memory and GL version. Connection and save-data gate *bytes*, not fill rate,
+ * and belong to `canFetchScene`; folding them in here would let a fast phone on 3g be told its
+ * shader work is slow. Weakest signal wins, and `gl:'none'` is 0: no drag cadence is affordable on
+ * a device with no context, which is why that path never fetches a scene at all.
+ */
+export function continuousRepaintBudgetScale(cap: Capability): number {
+  if (cap.gl === 'none') return 0;
+  let scale = 1;
+  if (cap.gl === 'webgl1') scale = Math.min(scale, 0.4);
+  if (cap.deviceMemoryGb !== null && cap.deviceMemoryGb <= 3) scale = Math.min(scale, 0.4);
+  else if (cap.deviceMemoryGb !== null && cap.deviceMemoryGb <= 4) scale = Math.min(scale, 0.65);
+  return scale;
+}
+
 export { budgets };

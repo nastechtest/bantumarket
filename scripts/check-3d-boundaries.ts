@@ -21,6 +21,17 @@ import { dirname, resolve as rpath, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
 
+/**
+ * The router is the app's entry, not a page dependency. A route imports it for `useRoute()`, and
+ * what that import actually brings is the router's own *static* module graph; its
+ * `lazy(() => import(...))` route table is a set of separate chunks fetched by navigation. Charging
+ * those chunks to every page that links the router makes /sign-in inherit the scene runtime it never
+ * loads — the false positive this rule removes. Static edges out of the router are still followed:
+ * an eager `import 'three'` there would ship to every page, which is the failure this fence exists
+ * to catch.
+ */
+const ROUTER_MODULE = `${ROOT}/apps/web-public/src/router.tsx`;
+
 /** Forbidden specifiers: the scene runtime, under any name it can arrive by. */
 const SCENE_PACKAGES = ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing'];
 const SCENE_EDGES = ['@nastech/ui-3d', '@nastech/ui-3d/scene'];
@@ -161,7 +172,7 @@ interface Reach {
  * pulled the runtime in — "Checkout.tsx reaches three via CanvasHost" is actionable; "index imports
  * three" is not.
  */
-function walk(entry: string, chain: string[] = [entry], seen = new Set<string>()): Reach[] {
+function walk(entry: string, chain: string[] = [entry], seen = new Set<string>(), staticOnly = false): Reach[] {
   if (seen.has(entry)) return [];
   seen.add(entry);
   const hits: Reach[] = [];
@@ -172,12 +183,13 @@ function walk(entry: string, chain: string[] = [entry], seen = new Set<string>()
     return hits;
   }
   for (const edge of specifiersOf(code)) {
+    if (staticOnly && edge.kind === 'dynamic') continue;
     if (edgeClass(edge.spec) === 'scene') {
       hits.push({ chain: [...chain, `${edge.spec}${edge.kind === 'dynamic' ? ' (dynamic)' : ''}`], kind: edge.kind });
       continue;
     }
     const next = resolveLocal(entry, edge.spec) ?? resolveWorkspace(entry, edge.spec);
-    if (next) hits.push(...walk(next, [...chain, relative(ROOT, next)], seen));
+    if (next) hits.push(...walk(next, [...chain, relative(ROOT, next)], seen, next === ROUTER_MODULE));
   }
   return hits;
 }
@@ -278,6 +290,13 @@ async function selfTest(): Promise<number> {
   writeFileSync(D, "export default function L(){ return import('@nastech/ui-3d/scene').then(() => null) }\n");
   const d = checkModule(D, 'first-paint', '/__selftest_lazy');
   rmSync(D, { force: true });
+  // E. a critical route that links the router for `useRoute()` and must NOT inherit the route
+  //    table's lazy chunks. This is the shape that made /sign-in look like it reached the scene:
+  //    the router's `lazy(() => import('./routes/Home.js'))` is navigation, not a dependency.
+  const E = `${dir}/__fence_selftest_router_consumer.tsx`;
+  writeFileSync(E, "import { useRoute } from '../router.js';\nexport default function R(){ return useRoute().path }\n");
+  const e = checkModule(E, 'critical', '/__selftest_router_consumer');
+  rmSync(E, { force: true });
   const tree = check();
 
   for (const f of [A, B, C, leaf]) rmSync(f, { force: true });
@@ -287,10 +306,11 @@ async function selfTest(): Promise<number> {
   if (b.length !== 1) failures.push(`injection B (transitive three on a first-paint route): expected 1 violation, got ${b.length}`);
   if (c.length !== 0) failures.push(`control C (clean static-path import): expected 0 violations, got ${c.length}`);
   if (d.length !== 0) failures.push(`control D (deferred scene chunk on a first-paint route): expected 0 violations, got ${d.length} — rule 2 is forbidding the lazy load the design is built on`);
+  if (e.length !== 0) failures.push(`control E (critical route importing the router): expected 0 violations, got ${e.length} — the router's lazy route table is being charged to every page that links the router`);
   if (tree.length !== 0) failures.push(`real tree with injections removed: expected 0, got ${tree.length} — the previous run leaked a file, or the fence is now red`);
 
   if (failures.length === 0) {
-    console.log('SELF-TEST OK — 2 injections caught by name, 2 clean controls passed (static-path import, deferred scene chunk), real tree clean.');
+    console.log('SELF-TEST OK — 2 injections caught by name, 3 clean controls passed (static-path import, deferred scene chunk, router link), real tree clean.');
     console.log(`  A chain: ${a[0]?.chain.join(' -> ')}`);
     console.log(`  B chain: ${b[0]?.chain.join(' -> ')}`);
     return 0;

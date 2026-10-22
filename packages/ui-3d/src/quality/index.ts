@@ -1,4 +1,4 @@
-export { probeCapability, canFetchScene, devicePixelRatioCap, UNSUPPORTED } from './capability.js';
+export { probeCapability, canFetchScene, devicePixelRatioCap, continuousRepaintBudgetScale, UNSUPPORTED } from './capability.js';
 export { selectLod, checkByteBudget, budgetVerdictFor } from './lod-selection.js';
 export {
   createFrameRateGovernor,

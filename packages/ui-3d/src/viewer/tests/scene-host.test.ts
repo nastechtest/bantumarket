@@ -60,11 +60,14 @@ describe('scene-host plan (pure entry decision, no DOM, no GL)', () => {
     expect(plan.level).toBe('static');
   });
 
-  test('canvas size drives the level: same device, thumbnail is high, full-screen is static', () => {
+  test('canvas size drives the level: same device, a thumbnail is high and a wall-sized canvas is static', () => {
     const cap = makeCapability();
     const manifest = makeManifest();
     expect(planScene({ manifest, capability: cap, canvasSize: { width: 60, height: 60 } }).level).toBe('high');
-    expect(planScene({ manifest, capability: cap, canvasSize: { width: 380, height: 380 } }).level).toBe('static');
+    // 380² css — the actual inspection canvas — is high on this device. Under the old 2.6 Mpx/s
+    // reading it was `static`, which is how every real scene got demoted.
+    expect(planScene({ manifest, capability: cap, canvasSize: { width: 380, height: 380 } }).level).toBe('high');
+    expect(planScene({ manifest, capability: cap, canvasSize: { width: 1200, height: 1200 } }).level).toBe('static');
   });
 
   test('the sprite-only manifest shape keeps its caption disclosures reachable via the poster', () => {

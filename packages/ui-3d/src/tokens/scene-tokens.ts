@@ -15,7 +15,20 @@ export const sceneTokens = {
   cameraNear: 0.01,
   cameraFar: 5,
   pivot: { x: 0, y: 0.021, z: 0 },
-  maxPixelsPerSecondBudget: 2_600_000,
+  /**
+   * Ceiling on *device pixels repainted per second* while a buyer drags — canvas area x dpr^2 x fps,
+   * the one number that folds canvas size, DPR and repaint rate together. It is read as a per-second
+   * rate on purpose: a canvas at rest repaints almost never (frameloop="demand"), so size alone
+   * measures nothing; continuous inspection is what can overheat a phone.
+   *
+   * Set for the capable end of the ladder: 2.6 M device pixels per frame x 60 fps.
+   * `quality/continuousRepaintBudgetScale` shrinks it for weaker devices and this is the *prior*;
+   * the frame-rate governor is the measurement that can overrule it.
+   *
+   * UNMEASURED. Gate D1 (low-end Android) must replace this number with a measured one; until then
+   * treat the tiers it produces as a sizing guard, not as proof a device can hold 60 fps.
+   */
+  maxPixelsPerSecondBudget: 156_000_000,
 } as const;
 
 export const lightingTokens = {
