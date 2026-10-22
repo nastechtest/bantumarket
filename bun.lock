@@ -83,8 +83,20 @@
       "name": "@nastech/design-tokens",
       "version": "0.0.0",
     },
+    "packages/forms": {
+      "name": "@nastech/forms",
+      "version": "0.0.0",
+    },
+    "packages/i18n": {
+      "name": "@nastech/i18n",
+      "version": "0.0.0",
+    },
     "packages/motion": {
       "name": "@nastech/motion",
+      "version": "0.0.0",
+    },
+    "packages/testing": {
+      "name": "@nastech/testing",
       "version": "0.0.0",
     },
     "packages/ui-3d": {
@@ -104,6 +116,13 @@
       "peerDependencies": {
         "react": "18.3.1",
         "react-dom": "18.3.1",
+      },
+    },
+    "tooling/asset-pipeline": {
+      "name": "@nastech/asset-pipeline",
+      "version": "0.1.0",
+      "bin": {
+        "nastech-capture": "./cli.ts",
       },
     },
   },
@@ -230,11 +249,19 @@
 
     "@nastech/api-contracts": ["@nastech/api-contracts@workspace:packages/api-contracts"],
 
+    "@nastech/asset-pipeline": ["@nastech/asset-pipeline@workspace:tooling/asset-pipeline"],
+
     "@nastech/design-system": ["@nastech/design-system@workspace:packages/design-system"],
 
     "@nastech/design-tokens": ["@nastech/design-tokens@workspace:packages/design-tokens"],
 
+    "@nastech/forms": ["@nastech/forms@workspace:packages/forms"],
+
+    "@nastech/i18n": ["@nastech/i18n@workspace:packages/i18n"],
+
     "@nastech/motion": ["@nastech/motion@workspace:packages/motion"],
+
+    "@nastech/testing": ["@nastech/testing@workspace:packages/testing"],
 
     "@nastech/ui-3d": ["@nastech/ui-3d@workspace:packages/ui-3d"],
 

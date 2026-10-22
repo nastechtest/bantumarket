@@ -1,0 +1,18 @@
+:root{
+  --ink-900:#0B0D10; --ink-800:#14171B; --ink-500:#3C444D; --ink-300:#7B858F; --ink-100:#D7DCE1;
+  --paper:#FFFFFF; --paper-warm:#F7F5F2; --accent:#0F62FE; --accent-deep:#0A2E5C;
+  --pos:#0E7A4F; --caution:#B05A00; --neg:#A4161A;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --font-display:"Ivar Display",Georgia,serif; --font-text:"Söhne",Inter,system-ui,sans-serif;
+  --radius-md:8px; --radius-lg:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font-text);color:var(--ink-900);background:var(--paper-warm);-webkit-font-smoothing:antialiased}
+h1,h2,.display{font-family:var(--font-display);font-weight:500;letter-spacing:-0.015em;line-height:1.08;margin:0}
+.page{max-width:1320px;margin:0 auto;padding:0 var(--s4)}
+.route-loading{padding:var(--s6) 0;color:var(--ink-300)}
+button,a.button{font:inherit;background:var(--accent);color:#fff;border:0;border-radius:var(--radius-md);padding:var(--s2) var(--s4);cursor:pointer;text-decoration:none;display:inline-block}
+button.secondary,a.button.secondary{background:transparent;color:var(--ink-900);border:1px solid var(--ink-100)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:var(--s2) var(--s3);border-bottom:1px solid var(--ink-100)}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
