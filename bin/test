@@ -1,0 +1,120 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Test runner. Usage:
+ *   bin/test                 run everything
+ *   bin/test Money           run files whose path matches "Money"
+ *   bin/test --verbose       list every test, not only failures
+ *
+ * Exits non-zero on any failure or error, so it is usable as a CI gate.
+ */
+require __DIR__ . '/autoload.php';
+
+$filter = null;
+$verbose = false;
+foreach (array_slice($argv, 1) as $argument) {
+    if ($argument === '--verbose' || $argument === '-v') {
+        $verbose = true;
+
+        continue;
+    }
+    $filter = $argument;
+}
+
+$root = dirname(__DIR__);
+$files = [];
+$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/tests'));
+foreach ($iterator as $file) {
+    if ($file->isDir() || !str_ends_with($file->getFilename(), 'Test.php')) {
+        continue;
+    }
+    $files[] = $file->getPathname();
+}
+sort($files);
+
+/** @var list<array{class:string,method:string}> $cases */
+$cases = [];
+foreach ($files as $path) {
+    $relative = substr($path, strlen($root . '/tests/'), -strlen('.php'));
+    $class = 'NasTech\\Tests\\' . str_replace('/', '\\', $relative);
+    if (!class_exists($class)) {
+        fwrite(STDERR, "Loaded {$path} but no class {$class} is present\n");
+        exit(2);
+    }
+    $reflection = new ReflectionClass($class);
+    if ($reflection->isAbstract()) {
+        continue;
+    }
+    if (!$reflection->isSubclassOf(NasTech\Tests\TestCase::class)) {
+        fwrite(STDERR, "{$class} does not extend TestCase\n");
+        exit(2);
+    }
+    foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+        if (str_starts_with($method->getName(), 'test')) {
+            $cases[] = ['class' => $class, 'method' => $method->getName()];
+        }
+    }
+}
+
+$passed = 0;
+$failed = 0;
+$errors = 0;
+$assertions = 0;
+$failures = [];
+
+foreach ($cases as $case) {
+    if ($filter !== null && stripos($case['class'] . '::' . $case['method'], $filter) === false) {
+        continue;
+    }
+
+    $instance = new $case['class']();
+    $label = substr($case['class'], strlen('NasTech\\Tests\\')) . '::' . $case['method'];
+
+    try {
+        $instance->setUp();
+        $instance->{$case['method']}();
+        $instance->tearDown();
+        $assertions += $instance->assertionCount();
+        $passed++;
+        if ($verbose) {
+            fwrite(STDOUT, "  ok  {$label}\n");
+        }
+    } catch (NasTech\Tests\AssertionFailed $failure) {
+        $failed++;
+        $assertions += $instance->assertionCount();
+        $failures[] = ['fail', $label, $failure->getMessage(), $failure->getFile() . ':' . $failure->getLine()];
+        fwrite(STDOUT, "  FAIL {$label}\n");
+    } catch (\Throwable $throwable) {
+        $errors++;
+        $assertions += $instance->assertionCount();
+        $failures[] = [
+            'err ',
+            $label,
+            $throwable::class . ': ' . $throwable->getMessage(),
+            $throwable->getFile() . ':' . $throwable->getLine(),
+        ];
+        fwrite(STDOUT, "  ERR  {$label}\n");
+    }
+}
+
+if ($failures !== []) {
+    fwrite(STDOUT, "\n" . str_repeat('=', 72) . "\n");
+    foreach ($failures as [$kind, $label, $message, $location]) {
+        fwrite(STDOUT, strtoupper($kind) . "  {$label}\n      {$message}\n      at {$location}\n\n");
+    }
+}
+
+$total = $passed + $failed + $errors;
+fwrite(STDOUT, sprintf(
+    "%d tests, %d assertions — %d passed, %d failed, %d errored\n",
+    $total,
+    $assertions,
+    $passed,
+    $failed,
+    $errors,
+));
+
+exit($failed + $errors === 0 ? 0 : 1);

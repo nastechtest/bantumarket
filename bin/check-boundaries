@@ -1,0 +1,342 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Module boundary checker. Usage:
+ *   bin/check-boundaries              verify src/ against config/module-boundaries.php
+ *   bin/check-boundaries --self-test  prove the checker itself can fail
+ *   bin/check-boundaries --verbose    list the allowed edges it accepted
+ *
+ * Exits non-zero on any violation, so it is a CI gate and not a report.
+ *
+ * Why a hand-written one: the standard tools for this (Deptrac, phpatop) arrive
+ * through Composer, and Composer cannot run in this environment — no PDO driver, so
+ * `composer install` refuses to resolve. That is not a reason to leave the boundary
+ * unenforced, and `token_get_all()` is in core. The parser here is deliberately
+ * small: it only answers "which module does this file reach into", which is the
+ * whole question the boundary asks.
+ */
+
+$root = dirname(__DIR__);
+$rules = require $root . '/config/module-boundaries.php';
+
+$flags = array_slice($argv, 1);
+$selfTest = in_array('--self-test', $flags, true);
+$verbose = in_array('--verbose', $flags, true) || in_array('-v', $flags, true);
+
+/**
+ * Every NasTech class reference made by a file, with the line it was made on.
+ *
+ * @return list<array{line:int, class:string, kind:string}>
+ */
+function dependencies_of(string $source): array
+{
+    $tokens = token_get_all($source);
+    $found = [];
+    $count = count($tokens);
+
+    for ($i = 0; $i < $count; $i++) {
+        $token = $tokens[$i];
+
+        if (!is_array($token)) {
+            continue;
+        }
+
+        $id = $token[0];
+
+        if ($id === T_USE) {
+            // Closure binding (`function () use ($x)`) is not an import.
+            $next = next_meaning($tokens, $i + 1);
+            if ($next === '(') {
+                continue;
+            }
+            if (is_array($next) && in_array($next[0], [T_FUNCTION, T_CONST], true)) {
+                $next = next_meaning($tokens, $i + 2);
+            }
+
+            $name = collect_name($tokens, $i + 1, $line);
+            if ($name !== null && refers_to_platform($name)) {
+                $found[] = ['line' => $line, 'class' => $name, 'kind' => 'import'];
+            }
+
+            continue;
+        }
+
+        // A fully-qualified reference written inline instead of imported:
+        //   new \NasTech\Orders\Order(...)  or  \NasTech\SharedKernel\Money::zero()
+        if ($id === T_NAME_FULLY_QUALIFIED || $id === T_NAME_QUALIFIED) {
+            if (refers_to_platform($token[1]) && !str_starts_with($token[1], 'NasTech\\Tests')) {
+                $found[] = ['line' => $token[2], 'class' => ltrim($token[1], '\\'), 'kind' => 'inline'];
+            }
+        }
+    }
+
+    // An `use NasTech\A\B;` statement is seen twice: once by the T_USE handler and
+    // once as the qualified-name token itself. One edge per line and class.
+    $unique = [];
+    foreach ($found as $dep) {
+        $unique[$dep['line'] . '|' . $dep['class']] = $dep;
+    }
+
+    return array_values($unique);
+}
+
+/** @return array|string|null the next token that is not whitespace or a comment */
+function next_meaning(array $tokens, int $from): array|string|null
+{
+    for ($i = $from; $i < count($tokens); $i++) {
+        if (is_array($tokens[$i]) && in_array($tokens[$i][0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+            continue;
+        }
+
+        return $tokens[$i];
+    }
+
+    return null;
+}
+
+/**
+ * The qualified name following a `use`, up to its terminator.
+ *
+ * @param int|null $line populated with the line the name starts on
+ */
+function collect_name(array $tokens, int $from, ?int &$line): ?string
+{
+    $name = '';
+    for ($i = $from; $i < count($tokens); $i++) {
+        $token = $tokens[$i];
+
+        if (is_array($token) && $token[0] === T_WHITESPACE) {
+            continue;
+        }
+
+        if (is_array($token) && $token[0] === T_AS) {
+            return $name === '' ? null : $name;
+        }
+
+        if ($token === ';' || $token === ',' || $token === '{') {
+            return $name === '' ? null : $name;
+        }
+
+        if (is_array($token) && in_array($token[0], [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)) {
+            if ($name === '') {
+                $line = $token[2];
+            }
+            $name .= $token[1];
+            continue;
+        }
+
+        return null;
+    }
+
+    return $name === '' ? null : $name;
+}
+
+function refers_to_platform(string $fqcn): bool
+{
+    return str_starts_with(ltrim($fqcn, '\\'), 'NasTech\\');
+}
+
+/** The module a namespace belongs to: NasTech\Commissions\X -> Commissions. */
+function module_of(string $fqcn): ?string
+{
+    $parts = explode('\\', ltrim($fqcn, '\\'));
+
+    return $parts[0] === 'NasTech' ? ($parts[1] ?? null) : null;
+}
+
+function namespace_of(string $source): ?string
+{
+    if (preg_match('/^namespace\s+([^;]+);/m', $source, $m) === 1) {
+        return trim($m[1]);
+    }
+
+    return null;
+}
+
+/**
+ * @param array<string, array<string,string>> $rules
+ * @return list<array{file:string, line:int, from:string, to:string, class:string}>
+ */
+function violations_in(string $path, string $source, array $rules, string $root): array
+{
+    $from = module_of((string) namespace_of($source));
+    if ($from === null) {
+        return [];
+    }
+
+    $allowed = $rules[$from] ?? [];
+    if (array_key_exists('*', $allowed)) {
+        return [];
+    }
+
+    $violations = [];
+    foreach (dependencies_of($source) as $dep) {
+        $to = module_of($dep['class']);
+        if ($to === null || $to === $from || $to === 'SharedKernel') {
+            continue;
+        }
+        if (isset($allowed[$to])) {
+            continue;
+        }
+
+        $violations[] = [
+            'file' => str_replace($root . '/', '', $path),
+            'line' => $dep['line'],
+            'from' => $from,
+            'to' => $to,
+            'class' => $dep['class'],
+        ];
+    }
+
+    return $violations;
+}
+
+/** @return list<array{file:string, line:int, from:string, to:string, class:string}> */
+function scan_tree(string $root, array $rules): array
+{
+    $violations = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($root . '/src', FilesystemIterator::SKIP_DOTS),
+    );
+
+    $files = [];
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $files[] = $file->getPathname();
+        }
+    }
+    sort($files);
+
+    foreach ($files as $file) {
+        $violations = array_merge(
+            $violations,
+            violations_in($file, (string) file_get_contents($file), $rules, $root),
+        );
+    }
+
+    return $violations;
+}
+
+function report(array $violations): void
+{
+    foreach ($violations as $v) {
+        fwrite(STDOUT, sprintf(
+            "  %s:%d  %s reaches into %s (%s)\n",
+            $v['file'],
+            $v['line'],
+            $v['from'],
+            $v['to'],
+            $v['class'],
+        ));
+    }
+}
+
+// --------------------------------------------------------------------------
+
+if (!is_dir($root . '/src')) {
+    fwrite(STDERR, "check-boundaries: no src/ to scan\n");
+    exit(2);
+}
+
+if ($selfTest) {
+    // The checker is only worth having if it can fail. Rather than trust that,
+    // write a file that breaks a documented rule, confirm the checker names it,
+    // and remove the file again.
+    $probeDir = $root . '/src/Commissions';
+    $probe = $probeDir . '/BoundaryProbe.php';
+    if (is_dir($probeDir) === false || file_exists($probe)) {
+        fwrite(STDERR, "check-boundaries: cannot use src/Commissions as the probe site\n");
+        exit(2);
+    }
+
+    $baseline = count(scan_tree($root, $rules));
+
+    try {
+        file_put_contents($probe, <<<'PHP'
+            <?php
+
+            declare(strict_types=1);
+
+            namespace NasTech\Commissions;
+
+            use NasTech\Handover\HandoverToken;
+
+            final class BoundaryProbe
+            {
+                public function __construct(private readonly HandoverToken $token)
+                {
+                }
+
+                public static function inlineReference(): string
+                {
+                    return \NasTech\Payments\WebhookVerifier::class;
+                }
+            }
+            PHP);
+
+        $violations = scan_tree($root, $rules);
+        $introduced = array_values(array_filter($violations, static fn (array $v): bool => $v['file'] === 'src/Commissions/BoundaryProbe.php'));
+    } finally {
+        unlink($probe);
+    }
+
+    fwrite(STDOUT, "self-test: injected Commissions -> {Handover, Payments}\n");
+    report($introduced);
+
+    $expected = 2;
+    if (count($introduced) !== $expected || count($violations) - $baseline !== $expected) {
+        fwrite(STDERR, sprintf(
+            "\nSELF-TEST FAILED: expected %d violations from the probe and %d total; got %d and %d.\n"
+                . "The boundary checker does not detect what it claims to.\n",
+            $expected,
+            $baseline + $expected,
+            count($introduced),
+            count($violations),
+        ));
+        exit(1);
+    }
+
+    fwrite(STDOUT, sprintf("\nself-test passed: %d violations detected, and the clean tree is %d\n", $expected, $baseline));
+    exit(0);
+}
+
+$violations = scan_tree($root, $rules);
+
+if ($verbose) {
+    fwrite(STDOUT, "Rules (module -> modules it may import, beyond SharedKernel):\n");
+    foreach ($rules as $module => $allowed) {
+        $edgeList = $allowed === []
+            ? ['(none — depends on SharedKernel only)']
+            : array_map(
+                static fn (string $to, string $why): string => sprintf('%s — %s', $to, $why),
+                array_keys($allowed),
+                array_values($allowed),
+            );
+        fwrite(STDOUT, sprintf("  %s\n", $module));
+        foreach ($edgeList as $edge) {
+            fwrite(STDOUT, sprintf("      %s\n", $edge));
+        }
+    }
+    fwrite(STDOUT, "\n");
+}
+
+fwrite(STDOUT, "Module boundaries\n=================\n");
+
+if ($violations !== []) {
+    report($violations);
+    fwrite(STDERR, sprintf(
+        "\n%d boundary violation%s. The edges in modules.dot are the architecture argument;\n"
+            . "an import the graph does not permit makes them decorative. Either revert the import\n"
+            . "or add the edge to the graph and to config/module-boundaries.php in the same change.\n",
+        count($violations),
+        count($violations) === 1 ? '' : 's',
+    ));
+    exit(1);
+}
+
+$modules = array_keys($rules);
+fwrite(STDOUT, sprintf("  %d modules, 0 violations\n", count($modules)));
+exit(0);
