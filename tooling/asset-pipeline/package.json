@@ -1,0 +1,21 @@
+{
+  "name": "@nastech/asset-pipeline",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Studio capture pipeline: intake, custody, metric alignment, QC gates, renditions, manifest, budget gate, private-bucket upload.",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*.ts"
+  },
+  "bin": {
+    "nastech-capture": "./cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit index.ts",
+    "test": "bun test .",
+    "capture": "bun ./cli.ts"
+  }
+}

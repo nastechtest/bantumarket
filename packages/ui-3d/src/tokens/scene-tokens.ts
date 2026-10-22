@@ -31,12 +31,52 @@ export const lightingTokens = {
   shadow: { enabled: true, blurRadius: 2.4, opacity: 0.18 } as const,
 } as const;
 
+/** The six materials the pilot category is built from. A watch is a case, a crystal, a dial and a
+ *  bracelet; nothing in the launch catalogue needs more. */
+export type MaterialKind = 'steel' | 'gold' | 'crystal' | 'leather' | 'rubber' | 'ceramic';
+
+/** A key of the primitive palette, never a hex literal. A material takes its colour by token name so
+ *  the scene can be re-skinned by editing a token instead of six components. */
+export type SceneColorToken = keyof typeof raw.color;
+
 export const materialTokens = {
   /** Physical materials only. Standard materials do not respond to the studio rig and the result
    *  is a flat toy that undercutsthe condition claim the render exists to support. */
-  roughness: { steel: 0.28, crystal: 0.04, leather: 0.72, rubber: 0.85, ceramic: 0.12 },
-  metalness: { steel: 0.94, gold: 1.0, ceramic: 0.02 },
-  clearcoat: { crystal: 0.85, polishedCase: 0.42 },
+  roughness: { steel: 0.28, gold: 0.22, crystal: 0.04, leather: 0.72, rubber: 0.85, ceramic: 0.12 },
+  metalness: { steel: 0.94, gold: 1.0, crystal: 0.0, leather: 0.0, rubber: 0.0, ceramic: 0.02 },
+  clearcoat: { steel: 0.3, gold: 0.24, crystal: 0.85, leather: 0.0, rubber: 0.0, ceramic: 0.55, polishedCase: 0.42 },
+  clearcoatRoughness: { steel: 0.14, gold: 0.1, crystal: 0.03, leather: 0.45, rubber: 0.55, ceramic: 0.06 },
+  /** Dielectric transmission. Only the crystal is transparent; nothing else in the catalogue is. */
+  transmission: { steel: 0.0, gold: 0.0, crystal: 0.65, leather: 0.0, rubber: 0.0, ceramic: 0.0 },
+  /** Metres, because `sceneTokens.unitsPerMeter` is 1 and a transmission depth in the wrong unit
+   *  turns a 1.2 mm crystal into a 1.2 m block of glass. */
+  thicknessMeters: { steel: 0.0, gold: 0.0, crystal: 0.0012, leather: 0.0, rubber: 0.0, ceramic: 0.0016 },
+  /** 1.77 is corundum, which is what a watch crystal actually is. */
+  ior: { steel: 1.5, gold: 1.5, crystal: 1.77, leather: 1.5, rubber: 1.5, ceramic: 1.4 },
+  /** Brushed steel and grained leather are anisotropic. Casting one round highlight over a brushed
+   *  case quietly rewrites the finish the condition report describes. */
+  highlightAnisotropy: { steel: 0.6, gold: 0.45, crystal: 0.0, leather: 0.25, rubber: 0.15, ceramic: 0.0 },
+  sheen: { steel: 0.0, gold: 0.0, crystal: 0.0, leather: 0.35, rubber: 0.12, ceramic: 0.0 },
+  sheenRoughness: { steel: 0.0, gold: 0.0, crystal: 0.0, leather: 0.6, rubber: 0.8, ceramic: 0.0 },
+  /** There is no "polished" variant and there never will be: a preset whose job is to make a worn
+   *  case look new contradicts the written disclosure, and a render is not evidence. */
+  baseColor: { steel: 'ink100', gold: 'paperWarm', crystal: 'paper', leather: 'ink700', rubber: 'ink500', ceramic: 'paperWarm' },
   anisotropyMax: 4,
   toneMappingExposure: 1.05,
-} as const;
+} as const satisfies {
+  roughness: Record<MaterialKind, number>;
+  metalness: Record<MaterialKind, number>;
+  /** `polishedCase` predates the per-material table and a component already reads it; the extras key
+   *  is the one a material kind cannot reach. */
+  clearcoat: Record<MaterialKind, number> & { polishedCase: number };
+  clearcoatRoughness: Record<MaterialKind, number>;
+  transmission: Record<MaterialKind, number>;
+  thicknessMeters: Record<MaterialKind, number>;
+  ior: Record<MaterialKind, number>;
+  highlightAnisotropy: Record<MaterialKind, number>;
+  sheen: Record<MaterialKind, number>;
+  sheenRoughness: Record<MaterialKind, number>;
+  baseColor: Record<MaterialKind, SceneColorToken>;
+  anisotropyMax: number;
+  toneMappingExposure: number;
+};

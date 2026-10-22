@@ -1,1 +1,14 @@
-{ "extends": "./tsconfig.base.json", "compilerOptions": { "noEmit": true }, "include": ["packages/*/src/**/*", "apps/*/src/**/*", "scripts/**/*"] }
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "apps/*/src/**/*",
+    "scripts/**/*",
+    "types/**/*",
+    "tooling/*/src/**/*",
+    "tooling/*/tests/**/*"
+  ]
+}

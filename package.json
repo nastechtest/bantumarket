@@ -11,11 +11,12 @@
   "scripts": {
     "build": "bun run --filter '*' build",
     "typecheck": "bun run --filter '*' typecheck",
-    "test": "bun run --filter '*' test",
+    "test": "bun scripts/run-tests.ts",
     "check:boundaries": "bun scripts/check-3d-boundaries.ts",
     "check:boundaries:self-test": "bun scripts/check-3d-boundaries.ts --self-test",
     "check:payload": "bun scripts/check-payload-budget.ts",
-    "check:all": "bun run check:boundaries:self-test && bun run typecheck && bun run test && bun run check:payload"
+    "check:all": "bun run check:boundaries:self-test && bun run typecheck && bun run test && bun run check:payload",
+    "test:all": "bun test packages apps tooling"
   },
   "devDependencies": {
     "typescript": "5.6.3",
