@@ -1,0 +1,162 @@
+{
+  "measuredAt": "2026-10-22T15:52:18.293Z",
+  "three": [
+    {
+      "file": "scene-Dz2jA6-Q.js",
+      "rawBytes": 827073,
+      "gzBytes": 222401
+    },
+    {
+      "file": "index-De-ioy-F.js",
+      "rawBytes": 137849,
+      "gzBytes": 44959
+    },
+    {
+      "file": "PilotWatch-DgdUXx26.js",
+      "rawBytes": 4067,
+      "gzBytes": 1830
+    },
+    {
+      "file": "Home-CBMNk43u.js",
+      "rawBytes": 2246,
+      "gzBytes": 1169
+    },
+    {
+      "file": "fixtures-EAlJlmls.js",
+      "rawBytes": 2394,
+      "gzBytes": 1095
+    },
+    {
+      "file": "Inspect-3yCF1y6v.js",
+      "rawBytes": 1695,
+      "gzBytes": 907
+    },
+    {
+      "file": "static-path-BnUJjupJ.js",
+      "rawBytes": 1528,
+      "gzBytes": 846
+    },
+    {
+      "file": "ItemPage-CQzDz6w7.js",
+      "rawBytes": 1429,
+      "gzBytes": 715
+    },
+    {
+      "file": "Search-DKWyWvuO.js",
+      "rawBytes": 806,
+      "gzBytes": 478
+    },
+    {
+      "file": "Handover-DwlOS_fz.js",
+      "rawBytes": 638,
+      "gzBytes": 388
+    },
+    {
+      "file": "Dispute-ChOb5CMg.js",
+      "rawBytes": 548,
+      "gzBytes": 331
+    },
+    {
+      "file": "Checkout-D2xeRL2f.js",
+      "rawBytes": 404,
+      "gzBytes": 287
+    },
+    {
+      "file": "SignIn-C2HIO59l.js",
+      "rawBytes": 483,
+      "gzBytes": 269
+    },
+    {
+      "file": "NotFound-BcefJH53.js",
+      "rawBytes": 251,
+      "gzBytes": 195
+    }
+  ],
+  "no3d": [
+    {
+      "file": "index-D7KjWkrO.js",
+      "rawBytes": 145266,
+      "gzBytes": 47077
+    },
+    {
+      "file": "fixtures-puMBsHC1.js",
+      "rawBytes": 2352,
+      "gzBytes": 1062
+    },
+    {
+      "file": "Home-ajSOBwLY.js",
+      "rawBytes": 2016,
+      "gzBytes": 1058
+    },
+    {
+      "file": "static-path-BbwG2H3h.js",
+      "rawBytes": 1528,
+      "gzBytes": 846
+    },
+    {
+      "file": "ItemPage-BjGLe34w.js",
+      "rawBytes": 1429,
+      "gzBytes": 719
+    },
+    {
+      "file": "Inspect-D2pwcUF0.js",
+      "rawBytes": 982,
+      "gzBytes": 588
+    },
+    {
+      "file": "Search-DXYcySkh.js",
+      "rawBytes": 806,
+      "gzBytes": 479
+    },
+    {
+      "file": "Handover-UiMzHFJ7.js",
+      "rawBytes": 638,
+      "gzBytes": 388
+    },
+    {
+      "file": "Dispute-BBLr1fkE.js",
+      "rawBytes": 548,
+      "gzBytes": 332
+    },
+    {
+      "file": "Checkout-B0seP1ad.js",
+      "rawBytes": 404,
+      "gzBytes": 288
+    },
+    {
+      "file": "no3d-stub-Bub9wvl-.js",
+      "rawBytes": 326,
+      "gzBytes": 271
+    },
+    {
+      "file": "SignIn-BgkqMzGs.js",
+      "rawBytes": 483,
+      "gzBytes": 271
+    },
+    {
+      "file": "NotFound-BG3cd7a9.js",
+      "rawBytes": 251,
+      "gzBytes": 196
+    }
+  ],
+  "results": [
+    {
+      "name": "first-paint chunk within the 170 KB budget",
+      "actualKb": 43.9052734375,
+      "limitKb": 170,
+      "note": "the entry chunk shared by every route class"
+    },
+    {
+      "name": "scene chunk within the 400 KB 3D-inspection ceiling",
+      "actualKb": 217.1884765625,
+      "limitKb": 400,
+      "note": "three + @react-three/fiber + drei, gzipped"
+    },
+    {
+      "name": "NO_3D build carries no renderer",
+      "actualKb": 0,
+      "limitKb": 0,
+      "note": "count of NO_3D chunks containing a WebGLRenderer marker"
+    }
+  ]
+}

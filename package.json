@@ -1,0 +1,35 @@
+{
+  "name": "nastech-market",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tooling/*"
+  ],
+  "scripts": {
+    "build": "bun run --filter '*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "check:boundaries": "bun scripts/check-3d-boundaries.ts",
+    "check:boundaries:self-test": "bun scripts/check-3d-boundaries.ts --self-test",
+    "check:payload": "bun scripts/check-payload-budget.ts",
+    "check:all": "bun run check:boundaries:self-test && bun run typecheck && bun run test && bun run check:payload"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "vite": "5.4.11",
+    "@vitejs/plugin-react": "4.3.3",
+    "vitest": "2.1.5",
+    "jsdom": "^25.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.169.0",
+    "@types/node": "^22.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
