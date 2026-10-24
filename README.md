@@ -1,5 +1,7 @@
 # NasTech Market — Bantu Market
 
+[![CI](https://github.com/nastechtest/bantumarket/actions/workflows/ci.yml/badge.svg)](https://github.com/nastechtest/bantumarket/actions/workflows/ci.yml)
+
 A user-to-user second-hand marketplace for South Africa, built as a working vertical slice: three web
 apps, nine shared packages, a PHP API, and a PostgreSQL schema that carries the money invariants.
 
