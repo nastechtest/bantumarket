@@ -299,7 +299,9 @@ LANGUAGE plpgsql AS $$
 DECLARE
     row capture.custody_entries%ROWTYPE;
     expected_sequence integer := 1;
-    previous_hash constant text := '0000000000000000000000000000000000000000000000000000000000000000';
+    -- NOT constant: the loop advances it to each row's digest. A CONSTANT here made PL/pgSQL
+    -- refuse the second assignment and the migration never applied.
+    previous_hash text := '0000000000000000000000000000000000000000000000000000000000000000';
     previous_instant timestamptz := NULL;
     recomputed text;
 BEGIN

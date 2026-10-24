@@ -23,6 +23,10 @@
 
 BEGIN;
 
+-- The digest checks in this module's triggers call pgcrypto's `digest()`. It is created here rather
+-- than left to a later migration: a module must not need a file that runs after it in order to work.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- ==========================================================================
 -- Schema
 -- ==========================================================================
