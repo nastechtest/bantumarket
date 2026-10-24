@@ -1,0 +1,52 @@
+name: Tests — 3D and animation
+
+# The scene runtime and the motion layer, plus the two boundary proofs. The fence self-test is the
+# interesting one: it injects an import of the scene runtime into a critical route and fails the job
+# if the checker does NOT catch it. A guard that is only ever seen green is a guard nobody has tested.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-3d-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  viewer:
+    name: ui-3d viewer and fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: bun test packages/ui-3d
+
+  animation:
+    name: motion
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Suite (reduced-motion, transitions, parallax budget)
+        run: bun test packages/motion
+
+  fence:
+    name: 3D import fence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: The checker catches an injected route
+        run: bun run check:boundaries:self-test
+
+      - name: No critical or first-paint route reaches the scene runtime
+        run: bun run check:boundaries

@@ -1,0 +1,43 @@
+name: Build — apps
+
+# The builders. Each app is built the way it ships (vite, production mode) and the artefact is
+# uploaded, so a build break is a named app rather than "the deploy failed". The NO_3D artefact is
+# built by the payload pipeline, which is the job that measures it.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-apps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web-public, web-seller, web-staff]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Production build
+        working-directory: apps/${{ matrix.app }}
+        run: bun run build
+
+      - name: Upload the build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/dist
+          if-no-files-found: error
+          retention-days: 7

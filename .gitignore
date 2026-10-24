@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-no3d/
 coverage/
 .bun/
 *.tsbuildinfo
@@ -7,3 +8,8 @@ coverage/
 .env
 .env.*
 .tooling/cache/
+# Published-tree hygiene. The NO_3D artefact is reproduced by CI rather than stored, and the SDD
+# working record (wave briefs, progress ledger, agent notes) stays on the build machine: it is how this
+# repository was made, not part of what it ships.
+.superpowers/
+apps/*/dist-no3d/

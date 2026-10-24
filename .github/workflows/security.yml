@@ -1,0 +1,73 @@
+name: Security
+
+# Three checks, all of which can actually fail: a committed secret, a vulnerable dependency, or a
+# personal detail that reached an analytics prop. The last one is the POPIA promise the product makes
+# in writing, so it is a gate rather than a guideline.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: No secret-shaped literals or env files
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse a committed .env
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)\.env($|\.)'; then
+            echo "::error::an environment file is committed; remove it and rotate anything it held"
+            exit 1
+          fi
+          echo "no env files tracked"
+
+      - name: Refuse key-shaped strings
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The redaction tests deliberately contain AWS's documented example key, so that one
+          # directory is excluded by pathspec rather than by weakening the pattern.
+          if git grep -nE '(BEGIN (RSA|OPENSSH|EC|PGP) PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|xox[baprs]-[A-Za-z0-9-]{10,})' \
+              -- . ':!tooling/asset-pipeline/tests' ':!**/dist/**' ':!**/dist-no3d/**'; then
+            echo "::error::a secret-shaped literal is committed"
+            exit 1
+          fi
+          echo "no key-shaped strings found"
+
+  dependencies:
+    name: Dependency advisories
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Audit
+        # Pinned to patched vite 5.4.21 / vitest 2.1.9: the four critical tinypool/vitest advisories
+        # were fixed rather than ignored, so this step can fail honestly.
+        run: bun audit
+
+  popia:
+    name: No personal data in an analytics prop
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: PII fence
+        run: bun test apps/web-public/src/features/analytics/tests/no-pii.test.ts
+      - name: Consent fence
+        run: bun test apps/web-public/src/features/analytics/tests/consent-gates.test.ts

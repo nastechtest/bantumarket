@@ -1,0 +1,35 @@
+name: Tests — seller and staff apps
+
+# Both are workspace shells over the same shared packages, so they run as a matrix: same steps, two
+# apps, and the job name says which one failed. Staff routes that are still placeholders are covered by
+# their own assertions (a placeholder must render as a placeholder), so this pipeline does not quietly
+# treat "not implemented" as "nothing to test".
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-marketplace-apps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suite:
+    name: ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web-seller, web-staff]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Suite
+        run: bun test apps/${{ matrix.app }}

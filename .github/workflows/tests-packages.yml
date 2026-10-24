@@ -1,0 +1,47 @@
+name: Tests — shared packages
+
+# One job per package, because the shared packages are the contract every app builds on: a red
+# design-token or api-contract suite must be readable as "the contract moved", not buried in a
+# 1 800-test log.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suite:
+    name: ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - api-client
+          - api-contracts
+          - design-system
+          - design-tokens
+          - forms
+          - i18n
+          - motion
+          - testing
+          - ui-3d
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Suite
+        run: bun test packages/${{ matrix.package }}
+
+      - name: Typecheck this package alone
+        working-directory: packages/${{ matrix.package }}
+        run: bun run typecheck

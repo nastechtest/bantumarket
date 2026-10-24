@@ -96,22 +96,77 @@ interface Edge {
  * imports a router type look like it imports the entire route table, which is a false positive so
  * large it would train people to ignore the fence. Dynamic `import()` is kept, but tagged — it is a
  * chunk boundary, and that distinction is what rule 2 turns on.
+ *
+ * Comments are masked before scanning, for the same credibility reason: this repository writes
+ * prose about `three` and about imports inside the headers it uses to explain itself, and a lazy
+ * `import\s+[\s\S]*?from` scan happily reads "…the fence's import graph … from 'three'" as a
+ * statement. That fabricates edges the bundle does not contain, and — because matches do not
+ * overlap — can swallow a real one. A character scan rather than a regex strip, so a `//` inside a
+ * URL in a string does not eat the rest of the line.
  */
+function maskComments(code: string): string {
+  let out = '';
+  let i = 0;
+  while (i < code.length) {
+    const c = code[i]!;
+    const next = code[i + 1];
+    if (c === '/' && next === '/') {
+      while (i < code.length && code[i] !== '\n') {
+        out += ' ';
+        i++;
+      }
+      continue;
+    }
+    if (c === '/' && next === '*') {
+      for (; i < code.length && !(code[i] === '*' && code[i + 1] === '/'); i++) {
+        out += code[i] === '\n' ? '\n' : ' '; // newlines kept so chains and line numbers still mean something
+      }
+      out += '  ';
+      i += 2;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      const quote = c;
+      out += c;
+      i++;
+      while (i < code.length) {
+        const s = code[i]!;
+        out += s;
+        if (s === '\\') {
+          i++;
+          if (i < code.length) {
+            out += code[i]!;
+            i++;
+          }
+          continue;
+        }
+        i++;
+        if (s === quote) break;
+      }
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
 function specifiersOf(code: string): Edge[] {
+  const masked = maskComments(code);
   const edges: Edge[] = [];
   const staticRe = /(?:^|[\s;}])(import|export)\s+([\s\S]*?)\s*from\s*['"]([^'"]+)['"]/g;
   const bareRe = /(?:^|[\s;}])(?:import)\s*['"]([^'"]+)['"]/g;
   const dynRe = /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
   const reqRe = /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
-  for (const m of code.matchAll(staticRe)) {
+  for (const m of masked.matchAll(staticRe)) {
     const clause = m[2]!.trim();
     if (/^type\b/.test(clause)) continue; // `import type { X } from '...'` ships no bytes
     edges.push({ spec: m[3]!, kind: 'static' });
   }
-  for (const m of code.matchAll(bareRe)) edges.push({ spec: m[1]!, kind: 'static' });
-  for (const m of code.matchAll(dynRe)) edges.push({ spec: m[1]!, kind: 'dynamic' });
-  for (const m of code.matchAll(reqRe)) edges.push({ spec: m[1]!, kind: 'static' });
+  for (const m of masked.matchAll(bareRe)) edges.push({ spec: m[1]!, kind: 'static' });
+  for (const m of masked.matchAll(dynRe)) edges.push({ spec: m[1]!, kind: 'dynamic' });
+  for (const m of masked.matchAll(reqRe)) edges.push({ spec: m[1]!, kind: 'static' });
 
   // `import('./x.js').then(...)` and `import type { A } from './b'` inside a clause list.
   return edges.filter((e) => !/^@types\//.test(e.spec));
@@ -297,9 +352,20 @@ async function selfTest(): Promise<number> {
   writeFileSync(E, "import { useRoute } from '../router.js';\nexport default function R(){ return useRoute().path }\n");
   const e = checkModule(E, 'critical', '/__selftest_router_consumer');
   rmSync(E, { force: true });
+  // F. prose that looks like an import. Every header in this repo explains itself with the words
+  //    "import" and "three" in the same sentence; if a comment can raise a violation, the fence is
+  //    a noise machine and people start adding exemptions to it. The masking must not cost sight
+  //    either — the real clean import below still resolves.
+  const F = `${dir}/__fence_selftest_prose.tsx`;
+  writeFileSync(
+    F,
+    "/**\n * The import graph here must never reach three or @react-three/fiber,\n * see notes about `import { Canvas } from 'three'` below.\n */\n// import { Vector3 } from 'three'; was removed\nimport { CLAIM_SCOPE_DISCLOSURE } from '@nastech/api-contracts';\nexport default function P(){ return void CLAIM_SCOPE_DISCLOSURE }\n",
+  );
+  const f = checkModule(F, 'critical', '/__selftest_prose');
+  rmSync(F, { force: true });
   const tree = check();
 
-  for (const f of [A, B, C, leaf]) rmSync(f, { force: true });
+  for (const p of [A, B, C, leaf]) rmSync(p, { force: true });
 
   const failures: string[] = [];
   if (a.length !== 1) failures.push(`injection A (direct scene import on a critical route): expected 1 violation, got ${a.length}`);
@@ -307,10 +373,11 @@ async function selfTest(): Promise<number> {
   if (c.length !== 0) failures.push(`control C (clean static-path import): expected 0 violations, got ${c.length}`);
   if (d.length !== 0) failures.push(`control D (deferred scene chunk on a first-paint route): expected 0 violations, got ${d.length} — rule 2 is forbidding the lazy load the design is built on`);
   if (e.length !== 0) failures.push(`control E (critical route importing the router): expected 0 violations, got ${e.length} — the router's lazy route table is being charged to every page that links the router`);
+  if (f.length !== 0) failures.push(`control F (comment prose naming three): expected 0 violations, got ${f.length} — prose is being scanned as code: ${f[0]?.chain.join(' -> ')}`);
   if (tree.length !== 0) failures.push(`real tree with injections removed: expected 0, got ${tree.length} — the previous run leaked a file, or the fence is now red`);
 
   if (failures.length === 0) {
-    console.log('SELF-TEST OK — 2 injections caught by name, 3 clean controls passed (static-path import, deferred scene chunk, router link), real tree clean.');
+    console.log('SELF-TEST OK — 2 injections caught by name, 4 clean controls passed (static-path import, deferred scene chunk, router link, comment prose), real tree clean.');
     console.log(`  A chain: ${a[0]?.chain.join(' -> ')}`);
     console.log(`  B chain: ${b[0]?.chain.join(' -> ')}`);
     return 0;

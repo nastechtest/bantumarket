@@ -1,0 +1,43 @@
+name: CI — quality gate
+
+# The one required check. It runs the whole repository at once: every workspace typechecked, every
+# suite, the tree-conformance gate and the 3D import fence. The per-app and per-package pipelines
+# below exist to say WHICH part broke; this one says whether the branch is shippable.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, tests and gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Typecheck every workspace
+        run: bun run typecheck
+
+      - name: Tree conformance (feature isolation, size budget, critical-route guard)
+        run: bun run check:tree
+
+      - name: Prove the 3D fence still fails on injection
+        run: bun run check:boundaries:self-test
+
+      - name: Prove no critical route can reach the scene runtime
+        run: bun run check:boundaries
+
+      - name: Full test suite
+        run: bun run test

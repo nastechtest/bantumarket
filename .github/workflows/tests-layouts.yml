@@ -1,0 +1,51 @@
+name: Tests — layouts and accessibility
+
+# "Layouts" here means the things that decide where content sits and whether it is reachable: the
+# breakpoint ladder, the header/nav/layering rules, the offline banner, the app shells, and the
+# design-system primitives they are built from. The accessibility engine is in the same pipeline on
+# purpose — a layout assertion that passes on markup a screen reader cannot use is not a pass.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-layouts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  layouts:
+    name: Layout rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Buyer layout (breakpoints, header, nav, layering, offline, fence)
+        run: bun test apps/web-public/src/layout
+
+      - name: Buyer shell configuration
+        run: bun test apps/web-public/src/bootstrap
+
+      - name: Seller and staff shells
+        run: bun test apps/web-seller/src/tests/layout.test.tsx apps/web-seller/src/tests/shell.test.tsx apps/web-staff/src/tests/shell.test.tsx
+
+      - name: Design-system primitives
+        run: bun test packages/design-system
+
+  accessibility:
+    name: Accessibility engine
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Every rule fires on the markup it is named for, and stays silent on correct markup
+        run: bun test packages/testing/src/a11y

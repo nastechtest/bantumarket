@@ -1,0 +1,28 @@
+name: Bun workspace install
+description: >
+  The pinned Bun toolchain plus a frozen workspace install, defined once so the pipelines cannot
+  drift from each other. Every workflow in this repository starts here; the version is pinned to
+  the one the suites were verified on rather than "latest", so a Bun release cannot turn a green
+  branch red overnight without a commit saying so.
+
+runs:
+  using: composite
+  steps:
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: 1.3.14
+
+    - name: Cache Bun's install cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: bun-cache-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: |
+          bun-cache-${{ runner.os }}-
+
+    - name: Install dependencies from the lockfile
+      shell: bash
+      # --frozen-lockfile is the point: if bun.lock and a package.json disagree, this fails instead of
+      # quietly resolving a different tree than the one that passed locally.
+      run: bun install --frozen-lockfile

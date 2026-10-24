@@ -1,0 +1,41 @@
+name: Payload — build budget
+
+# Three numbers decide whether the 3D plan is affordable: the first-paint entry chunk, the lazily
+# loaded scene chunk, and the NO_3D build carrying no renderer at all. This job rebuilds both
+# artefacts from scratch rather than trusting numbers committed from a laptop.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payload-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  budget:
+    name: Measure dist and dist-no3d
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Build both artefacts and assert the budgets
+        run: bun scripts/check-payload-budget.ts --build
+
+      - name: Keep the measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payload-report
+          path: |
+            apps/web-public/dist
+            apps/web-public/dist-no3d
+          if-no-files-found: warn
+          retention-days: 3

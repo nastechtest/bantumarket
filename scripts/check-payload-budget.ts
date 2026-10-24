@@ -19,7 +19,7 @@ import { readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 
 import { gzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { budgets } from '../packages/api-contracts/index';
+import { budgets } from '@nastech/api-contracts';
 
 const ROOT = resolve(new URL('..', import.meta.url).pathname.replace(/\/$/, ''));
 const APP = resolve(ROOT, 'apps/web-public');

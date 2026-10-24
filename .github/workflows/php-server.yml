@@ -1,0 +1,55 @@
+name: Tests — PHP API
+
+# The API lives in `server/`: plain PHP 8.3 with a hand-rolled autoloader and its own test runner, so
+# there is nothing to composer-install. Three things run: every file is linted, the suite runs, and the
+# module boundary checker proves no module reached into another's internals.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: php-server-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP 8.3
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+
+      - name: Lint every PHP file
+        working-directory: server
+        shell: bash
+        run: |
+          set -uo pipefail
+          status=0
+          while IFS= read -r -d '' file; do
+            if ! php -l "$file" > /tmp/lint.out 2>&1; then
+              cat /tmp/lint.out
+              status=1
+            fi
+          done < <(find src tests bin config -type f -name '*.php' -print0)
+          exit "$status"
+
+      - name: Suite
+        working-directory: server
+        run: ./bin/test
+
+      - name: Module boundaries
+        working-directory: server
+        run: ./bin/check-boundaries

@@ -1,0 +1,34 @@
+name: Tests — buyer app
+
+# web-public is the largest surface (listing, item, checkout, dispute, analytics, inspect). It gets its
+# own pipeline so a failure names the app instead of "the suite was red".
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-buyer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  buyer:
+    name: web-public
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Suite
+        run: bun test apps/web-public
+
+      - name: The POPIA measurement fence, on its own
+        # Named separately because it is the one suite where a green result is a compliance claim, not
+        # a convenience: no PII in a prop, no behavioural event without consent.
+        run: bun test apps/web-public/src/features/analytics

@@ -9,20 +9,20 @@
     "tooling/*"
   ],
   "scripts": {
-    "build": "bun run --filter '*' build",
+    "build": "bun run --filter './apps/*' build",
     "typecheck": "bun run --filter '*' typecheck",
-    "test": "bun scripts/run-tests.ts",
+    "test": "bun test packages apps tooling",
+    "check:tree": "bun tooling/tree-conformance/check.ts",
     "check:boundaries": "bun scripts/check-3d-boundaries.ts",
     "check:boundaries:self-test": "bun scripts/check-3d-boundaries.ts --self-test",
     "check:payload": "bun scripts/check-payload-budget.ts",
-    "check:all": "bun run check:boundaries:self-test && bun run typecheck && bun run test && bun run check:payload",
-    "test:all": "bun test packages apps tooling"
+    "check:all": "bun run check:tree && bun run check:boundaries:self-test && bun run typecheck && bun run test && bun run check:payload"
   },
   "devDependencies": {
     "typescript": "5.6.3",
-    "vite": "5.4.11",
+    "vite": "5.4.21",
     "@vitejs/plugin-react": "4.3.3",
-    "vitest": "2.1.5",
+    "vitest": "2.1.9",
     "jsdom": "^25.0.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.6.0",
