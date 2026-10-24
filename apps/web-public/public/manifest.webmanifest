@@ -1,0 +1,33 @@
+{
+  "name": "NasTech Market — second-hand, inspected",
+  "short_name": "NT Market",
+  "description": "South African second-hand marketplace. Pre-owned watches, photographed from 48 angles, disclosed in writing.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "en-ZA",
+  "dir": "ltr",
+  "theme_color": "#0B0D10",
+  "background_color": "#FFFFFF",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Search watches", "url": "/search" },
+    { "name": "Sign in", "url": "/sign-in" }
+  ]
+}

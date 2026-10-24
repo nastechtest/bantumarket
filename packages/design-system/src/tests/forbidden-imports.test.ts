@@ -12,7 +12,13 @@ import { join } from 'node:path';
 
 const SRC = new URL('..', import.meta.url).pathname;
 
-const FORBIDDEN_PREFIXES = ['@nastech/ui-3d', 'three', '@react-three'];
+/**
+ * Scene runtime: the package sits on the first-paint path of every route. The `@nastech/testing`,
+ * `@nastech/i18n` and `@nastech/forms` additions are wave-B concurrency fences — those packages
+ * are owned by other agents mid-build, so importing them here would couple this package's green
+ * state to their half-written source.
+ */
+const FORBIDDEN_PREFIXES = ['@nastech/ui-3d', 'three', '@react-three', '@nastech/testing', '@nastech/i18n', '@nastech/forms'];
 
 function isForbidden(spec: string): boolean {
   return FORBIDDEN_PREFIXES.some((p) => spec === p || spec.startsWith(`${p}/`));
@@ -61,6 +67,9 @@ describe('design-system import fence', () => {
       `const THREE = require('three');`,
       `const load = () => import('@react-three/fiber');`,
       `import 'three/examples/jsm/controls/OrbitControls';`,
+      `import { render } from '@nastech/testing';`,
+      `import { useLocale } from '@nastech/i18n';`,
+      `import { Form } from '@nastech/forms';`,
     ];
     for (const code of injections) {
       expect(specifiersOf(code).some(isForbidden), `missed: ${code}`).toBe(true);

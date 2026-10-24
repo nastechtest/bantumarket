@@ -149,7 +149,19 @@ export function buildManifest(input: ManifestBuildInput): AssetManifest {
   const modelSet = new Set<LodTier>();
   for (const model of input.models) {
     if (model.lod === 'poster') throw inputInvalid(`${model.id} is a MODEL carrying the poster lod.`, 'Keep the poster out of the model chain; it is the static path, not a tier.');
+    if (modelSet.has(model.lod)) {
+      throw inputInvalid(
+        `Two model renditions claim tier "${model.lod}".`,
+        'A tier is a slot in the client ladder; two files in one slot means the client silently serves whichever it read last.',
+      );
+    }
     modelSet.add(model.lod);
+  }
+  if (input.poster.kind !== 'POSTER') {
+    throw inputInvalid(
+      `The poster slot holds ${input.poster.id}, which is a ${input.poster.kind}.`,
+      'The poster is the no-WebGL path; a model in that slot would leave a buyer with nothing to look at.',
+    );
   }
 
   const supported = input.qc.scopeSupported;

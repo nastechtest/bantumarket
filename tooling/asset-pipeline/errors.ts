@@ -27,7 +27,15 @@ export type CaptureErrorCode =
   | 'bucket_unavailable'
   | 'checksum_mismatch'
   | 'custody_chain_broken'
-  | 'capture_not_viable';
+  | 'capture_not_viable'
+  | 'station_protocol'
+  | 'calibration_drift'
+  | 'frame_manifest_invalid'
+  | 'transfer_incomplete'
+  | 'zip_corrupt'
+  | 'rendition_set_incomplete'
+  | 'release_refused'
+  | 'signature_invalid';
 
 /**
  * Exit codes. 0 is reserved for "the step actually happened". Kept in one table so a new failure
@@ -49,6 +57,14 @@ export const EXIT_CODES: Readonly<Record<CaptureErrorCode, number>> = {
   checksum_mismatch: 8,
   custody_chain_broken: 9,
   capture_not_viable: 10,
+  station_protocol: 11,
+  calibration_drift: 5,
+  frame_manifest_invalid: 6,
+  transfer_incomplete: 8,
+  zip_corrupt: 8,
+  rendition_set_incomplete: 7,
+  release_refused: 12,
+  signature_invalid: 9,
 };
 
 /** Short machine-readable summary for `--json`. */
@@ -68,6 +84,14 @@ export const FAILURE_SUMMARIES: Readonly<Record<CaptureErrorCode, string>> = {
   checksum_mismatch: 'Uploaded bytes do not hash to the manifest digest.',
   custody_chain_broken: 'The append-only custody history does not verify.',
   capture_not_viable: 'Item cannot recover the cost of its own capture.',
+  station_protocol: 'The capture rig and the pipeline do not speak the same protocol.',
+  calibration_drift: 'The station has drifted past the scale tolerance; models from it would be wrong.',
+  frame_manifest_invalid: 'The frame manifest does not describe a complete, sealed capture.',
+  transfer_incomplete: 'Not every frame in the sealed manifest reached the origin.',
+  zip_corrupt: 'A capture archive failed its central-directory or CRC check.',
+  rendition_set_incomplete: 'The rendition set is missing a tier or carries a duplicate.',
+  release_refused: 'A release was asked for without the evidence a release requires.',
+  signature_invalid: 'A signed media URL failed its signature, expiry or key check.',
 };
 
 export type FailureContext = Readonly<Record<string, unknown>>;
@@ -272,5 +296,81 @@ export function captureNotViable(
     `This item lists at ${formatRand(priceCents)}. Capture costs ${formatRand(captureCostCents)} against a ${Math.round(takeRate * 100)} % commission, so it must clear ${formatRand(breakEvenCents)} for the capture to pay for itself.`,
     'The static path (poster + turntable + written condition) is sufficient for items below the line — list it that way rather than spending the capture budget.',
     { priceCents, breakEvenCents, captureCostCents, takeRate },
+  );
+}
+
+export function stationProtocol(what: string, detail: string, hint: string, context: FailureContext = {}): CaptureError {
+  return new CaptureError('station_protocol', `${what}: ${detail}`, hint, context);
+}
+
+export function calibrationDrift(
+  stationId: string,
+  driftRatio: number,
+  tolerance: number,
+  caseDiameterMm: number,
+): CaptureError {
+  const errorMm = caseDiameterMm * driftRatio;
+  return new CaptureError(
+    'calibration_drift',
+    `Station ${stationId} has drifted ${(driftRatio * 100).toFixed(2)} % against a ${(tolerance * 100).toFixed(2)} % tolerance; a 40.0 mm case would be published as ${(40 + errorMm).toFixed(1)} mm.`,
+    'Re-calibrate the station against the reference card before capturing. The job stays at intake: no frames should be shot on a drifted rig.',
+    { stationId, driftRatio, tolerance, caseDiameterMm },
+  );
+}
+
+export function frameManifestInvalid(what: string, detail: string, context: FailureContext = {}): CaptureError {
+  return new CaptureError(
+    'frame_manifest_invalid',
+    `Frame manifest refused (${what}): ${detail}`,
+    'Re-seal the manifest from the station session directory; a manifest edited elsewhere is not evidence of what was shot.',
+    context,
+  );
+}
+
+export function transferIncomplete(sessionId: string, missing: number, total: number): CaptureError {
+  return new CaptureError(
+    'transfer_incomplete',
+    `Session ${sessionId} has ${missing} of ${total} frames unacknowledged by the origin.`,
+    'Resume the transfer; do not mark the session complete or delete the station copy until every digest is acknowledged.',
+    { sessionId, missing, total },
+  );
+}
+
+export function zipCorrupt(archive: string, reason: string): CaptureError {
+  return new CaptureError(
+    'zip_corrupt',
+    `Archive ${archive} does not verify: ${reason}.`,
+    'Do not unzip or re-pack it by hand — that would change the bytes the station sealed. Re-export from the station.',
+    { archive, reason },
+  );
+}
+
+export function renditionSetIncomplete(
+  assetId: string,
+  missing: readonly string[],
+  duplicates: readonly string[],
+): CaptureError {
+  const parts = [
+    ...(missing.length > 0 ? [`missing ${missing.join(', ')}`] : []),
+    ...(duplicates.length > 0 ? [`duplicated ${duplicates.join(', ')}`] : []),
+  ];
+  return new CaptureError(
+    'rendition_set_incomplete',
+    `Asset ${assetId} rendition set is incomplete: ${parts.join('; ') || 'no renditions'}.`,
+    'Re-run process for the missing tiers. A manifest that lists a tier nobody built makes the client fetch a 404 it cannot distinguish from an outage.',
+    { assetId, missing, duplicates },
+  );
+}
+
+export function releaseRefused(what: string, detail: string, hint: string, context: FailureContext = {}): CaptureError {
+  return new CaptureError('release_refused', `${what}: ${detail}`, hint, context);
+}
+
+export function signatureInvalid(what: string, detail: string): CaptureError {
+  return new CaptureError(
+    'signature_invalid',
+    `${what} is not valid: ${detail}.`,
+    'Re-issue the signed URL from the release record. Never widen an expiry or disable the check to make a fetch work.',
+    { what, detail },
   );
 }

@@ -1,0 +1,78 @@
+/*
+ * Layering — the only place a stacking number exists in the app's CSS.
+ *
+ * CONTRACT-GAP: @nastech/design-tokens (wave A, frozen) has no z-layer module, so the scale is
+ * declared here; the controller may promote it to `design-tokens/src/z-layers.ts` and re-export.
+ * The rules layering.test.ts enforces:
+ *   1. every z-index declaration anywhere in styles/*.css is `var(--nt-z-<layer>)` — no bare
+ *      numbers, no numeric fallbacks (a fallback is a free-styled number with extra steps);
+ *   2. each --nt-z-* variable is defined exactly once, in this file, in ascending order;
+ *   3. no component sets `zIndex` inline.
+ * Order is a product decision, not a preference: the offline banner must beat the header (it is
+ * the state the user cannot act through), the buy bar must beat the tab bar (thumb, then money).
+ */
+:root {
+  --nt-z-header: 50;
+  --nt-z-dropdown: 60;
+  --nt-z-offline: 70;
+  --nt-z-tabbar: 80;
+  --nt-z-buybar: 90;
+  --nt-z-consent: 150;
+  --nt-z-skip: 200;
+  --nt-z-overlay: 400;
+  --nt-z-toast: 500;
+}
+
+/* Chrome position/stack rules. Visual identity lives inline in components, from tokens. */
+.nt-skip-link {
+  position: fixed;
+  top: var(--nt-space-s2);
+  left: var(--nt-space-s2);
+  z-index: var(--nt-z-skip);
+  transform: translateY(-200%);
+  background: var(--nt-ink-900);
+  color: var(--nt-paper);
+  padding: var(--nt-space-s2) var(--nt-space-s4);
+  border-radius: var(--nt-radius-md);
+  text-decoration: none;
+}
+.nt-skip-link:focus {
+  transform: none;
+}
+
+.nt-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--nt-z-header);
+}
+
+.nt-account-menu__popover {
+  position: absolute;
+  z-index: var(--nt-z-dropdown);
+}
+
+.nt-offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: var(--nt-z-offline);
+}
+
+.nt-tab-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--nt-z-tabbar);
+}
+
+.nt-sticky-buy {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--nt-z-buybar);
+}
+
+.nt-consent-slot {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--nt-z-consent);
+}

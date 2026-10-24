@@ -1,11 +1,7 @@
 import type { RouteDef } from '../router.js';
+import AuthPage from '../features/auth/index.js';
 
-/** Wired by the web-staff wave; budget class 'critical'. */
+/** Route class `critical`: sign-in may never reach the scene runtime. */
 export default function SignIn({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Sign in — not yet implemented.</p>
-    </section>
-  );
+  return <AuthPage route={route} />;
 }

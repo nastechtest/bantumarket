@@ -1,0 +1,47 @@
+/*
+ * High contrast. Two triggers: the OS preference (`prefers-contrast: more` / forced colors) and
+ * an explicit in-app opt-in (`html[data-contrast="more"]`) for the buyer who cannot find the OS
+ * setting — the setting that matters on a sunlit street in Joburg is the one they can reach.
+ *
+ * Contrast here is against the token palette: ink-500 on paper is ~7.6:1, but chrome borders
+ * (ink-100) are decorative and fail under bright light, so borders step up to ink-900 and text
+ * to pure ink. Never brighten an assurance colour to meet contrast — signal-* carry meaning and
+ * get underline/text reinforcement here instead.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --nt-contrast-border: var(--nt-ink-900);
+  }
+}
+html[data-contrast="more"] {
+  --nt-contrast-border: var(--nt-ink-900);
+}
+
+:where(.nt-contrast-border, .nt-header, .nt-footer, .nt-tab-bar, .card, .nt-sticky-buy) {
+  border-color: var(--nt-contrast-border, currentColor);
+}
+
+html[data-contrast="more"] .nt-fine,
+html[data-contrast="more"] .nt-eyebrow {
+  color: var(--nt-ink-900);
+}
+
+/* Underlines are the contrast-safe affordance for links in chrome. */
+html[data-contrast="more"] main a,
+html[data-contrast="more"] .nt-footer a {
+  text-decoration: underline;
+}
+
+/* The assurance trio must stay distinguishable without relying on colour alone. */
+html[data-contrast="more"] [data-assurance] {
+  border: 1px solid var(--nt-ink-900);
+  text-decoration: underline;
+}
+
+@media (forced-colors: active) {
+  .nt-tab-bar__item,
+  .nt-skip-link,
+  .nt-header {
+    border: 1px solid CanvasText;
+  }
+}

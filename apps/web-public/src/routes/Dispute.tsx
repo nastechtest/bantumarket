@@ -1,14 +1,19 @@
-/** Critical route. Evidence upload is a file input, not a camera or a render. */
-export default function Dispute() {
+/**
+ * Critical route: a dispute is a money claim, so it is gated. Evidence upload is a file input, not
+ * a camera or a render, and the whole graph below stays clear of the scene runtime.
+ *
+ * `RequireSession` re-verifies with the server on every mount rather than trusting a stored flag,
+ * so an anonymous visitor gets the sign-in form and never the intake; `useDispute` independently
+ * refuses a null principal, which is why the gate has a proof behind it instead of only a promise.
+ */
+import type { RouteDef } from '../router.js';
+import { RequireSession } from '../features/auth/routes-guard.js';
+import DisputeFeaturePage from '../features/dispute/index.js';
+
+export default function Dispute({ route }: { route: RouteDef }) {
   return (
-    <section>
-      <h1>Open a dispute</h1>
-      <p>Tell us what is different from the listing. The condition record the seller agreed to is attached automatically.</p>
-      <label htmlFor="d">What is wrong</label>
-      <textarea id="d" rows={5} />
-      <label htmlFor="f">Photos</label>
-      <input id="f" type="file" accept="image/*" multiple />
-      <button type="button">Submit dispute</button>
-    </section>
+    <RequireSession label="Sign in to open this dispute">
+      <DisputeFeaturePage route={route} />
+    </RequireSession>
   );
 }

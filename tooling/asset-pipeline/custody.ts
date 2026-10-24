@@ -105,6 +105,21 @@ export class CustodyLog {
       if (hash !== recomputed) {
         throw custodyChainBroken(row.sequence, `row digest is ${hash.slice(0, 12)}…, re-digesting gives ${recomputed.slice(0, 12)}…`);
       }
+      // A digest proves the row was not edited, not that the move it records ever happened in
+      // that order. Replaying the state machine here is what catches a file whose rows were
+      // removed from another job or stitched together from two attempts.
+      const last = log.#lastByJob.get(row.jobId);
+      if (last === undefined) {
+        if (row.from !== null || row.to !== 'intake') {
+          throw custodyChainBroken(row.sequence, `job ${row.jobId} has no history, so its first entry must open it at intake`);
+        }
+      } else {
+        if (row.from !== last) {
+          throw custodyChainBroken(row.sequence, `job ${row.jobId} is in "${last}", but the entry moves from "${row.from ?? 'nothing'}"`);
+        }
+        const verdict = canTransition(last, row.to);
+        if (!verdict.ok) throw custodyChainBroken(row.sequence, `job ${row.jobId}: ${verdict.reason}`);
+      }
       log.#rows.push(Object.freeze({ ...row }));
       log.#lastByJob.set(row.jobId, row.to);
       prevHash = row.hash;

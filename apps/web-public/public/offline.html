@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>You are offline · NasTech Market</title>
+    <!--
+      Offline fallback document. Rules, all load-bearing:
+      - no script tags, no stylesheet links: this page must render from the HTTP cache alone
+        and from a cold fetch on a dead network. Everything below is inline.
+      - the colour values are @nastech/design-tokens hex (layering.test.ts asserts parity;
+        a standalone HTML file cannot import the TS module).
+      - the copy is honest: cached browsing yes, buying no, payments never queued.
+    -->
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: "Söhne", "Inter", system-ui, sans-serif;
+        background: #FFFFFF;
+        color: #0B0D10;
+        line-height: 1.55;
+        padding: 48px 16px;
+        box-sizing: border-box;
+      }
+      main { max-width: 46rem; margin: 0 auto; }
+      h1 { font-family: "Ivar Display", Georgia, serif; font-weight: 500; letter-spacing: -0.015em; font-size: 1.75rem; margin: 0 0 8px; }
+      .eyebrow { color: #A4161A; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.02em; margin: 0 0 12px; }
+      p { color: #3C444D; margin: 0 0 16px; }
+      .card {
+        border: 1px solid #D7DCE1;
+        border-radius: 14px;
+        padding: 16px;
+        background: #F7F5F2;
+        margin: 0 0 24px;
+      }
+      .card strong { color: #0B0D10; }
+      a.button {
+        display: inline-block;
+        font: inherit;
+        background: #0F62FE;
+        color: #FFFFFF;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 12px 24px;
+        min-height: 48px;
+        box-sizing: border-box;
+      }
+      a.button.secondary { background: transparent; color: #0B0D10; border: 1px solid #D7DCE1; }
+      .fine { font-size: 0.8125rem; color: #7B858F; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Connection lost</p>
+      <h1>You are offline.</h1>
+      <p>
+        Pages you already opened are still readable from this device. Prices, availability and
+        seller replies you can see right now are from the last moment we were connected —
+        trust them accordingly.
+      </p>
+      <div class="card">
+        <strong>Buying is disabled while you are offline.</strong>
+        <p style="margin-top: 8px">
+          We do not queue, stage or retry payments while you are offline. Nothing you tap now
+          will "go through later" — when your connection returns, you will see the live price
+          and decide again. That is your protection, not an inconvenience.
+        </p>
+      </div>
+      <p>
+        <a class="button" href="/">Try to reconnect</a>
+        <a class="button secondary" href="/legal/returns">Returns policy (cached copy may vary)</a>
+      </p>
+      <p class="fine">
+        NasTech Market · Johannesburg, South Africa. If the order was already paid for, it is on
+        the ledger, not on this page — reconnect and open My orders.
+      </p>
+    </main>
+  </body>
+</html>

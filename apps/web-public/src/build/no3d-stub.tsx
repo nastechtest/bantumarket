@@ -9,6 +9,15 @@ import type { ReactNode } from 'react';
 import { PosterFallback as RealPoster, TurntableSprite as RealSprite } from '../no3d/fallback-reexport.js';
 
 export const CanvasHost = (_props: { children?: ReactNode; ariaLabel: string; dprCap: number }) => null;
+/**
+ * `SceneHost` and `LightingRig` are imported by `features/inspect/scene-mount.tsx`, which is reached
+ * only through a dynamic `import()`. The NO_3D build still has to BUNDLE that module — the fallback
+ * decision is made at runtime, not by dead-code elimination — so the two exports must exist here or
+ * the artefact cannot be built. Both render nothing: under NO_3D there is no renderer to host and no
+ * light to place, and the static path is what a buyer sees.
+ */
+export const SceneHost = (_props: Record<string, unknown>) => null;
+export const LightingRig = () => null;
 export const PosterFallback = RealPoster;
 export const TurntableSprite = RealSprite;
 export const probeCapability = () => UNSUPPORTED;

@@ -99,7 +99,7 @@ const TIER_SPECS: readonly TierSpec[] = [
 
 /** `--simplify` is a mesh-decimation tolerance; larger loses detail, so each tier trades detail for bytes. */
 const SIMPLIFY_BY_TIER: Readonly<Record<'lod0' | 'lod1' | 'lod2', string>> = { lod0: '0.0001', lod1: '0.002', lod2: '0.006' };
-const TEXTURE_PX_BY_TIER: Readonly<Record<'lod0' | 'lod1' | 'lod2', string>> = { lod0: '2048', lod1: '1024', lod2: '512' };
+export const TEXTURE_PX_BY_TIER: Readonly<Record<'lod0' | 'lod1' | 'lod2', string>> = { lod0: '2048', lod1: '1024', lod2: '512' };
 
 export interface RenditionGenInput {
   /** The reconstruction the studio handed over: a .glb mesh, or the .blend it came from. */

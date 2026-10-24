@@ -254,6 +254,19 @@ function runIntake(args: ParsedArgs, io: Io): CommandResult {
   const studio = required(args.flags, 'studio', 'intake');
   const price = money(Math.round(requiredNumber(args.flags, 'price-cents', 'intake')));
 
+  // Everything the receipt will refuse is checked before the custody log is touched. Otherwise a
+  // whitespace-only title would leave an intake row with no job and no receipt, and a re-run would
+  // be refused for reusing a job id whose history exists precisely because the first run failed.
+  for (const [label, value] of [
+    ['job id', jobId],
+    ['item id', itemId],
+    ['title', title],
+    ['actor', actor],
+    ['studio', studio],
+  ] as const) {
+    if (!value.trim()) throw inputInvalid(`intake needs a non-empty ${label}.`, 'A receipt that cannot identify the item or the taker is not custody evidence.');
+  }
+
   if (existsSync(join(store.workspace, 'jobs', `${jobId}.json`))) {
     throw inputInvalid(`Job "${jobId}" already exists.`, 'A job id is a custody key; reusing one merges two items into one history.');
   }
@@ -304,9 +317,19 @@ function runCapture(args: ParsedArgs, io: Io): CommandResult {
   const session = resolve(required(args.flags, 'session', 'capture'));
   const job = store.readJob(jobId);
 
+  // The directory is the authority. `--frames` is accepted only so a station that also sealed a
+  // manifest can prove the two counts agree; a declared number that disagrees with the disk is a
+  // session in the middle of copying, not a capture.
+  const counted = countFrames(session);
   const declared = flag(args.flags, 'frames');
-  const frames = declared === null ? countFrames(session) : Number(declared);
-  if (!Number.isInteger(frames) || frames <= 0) throw inputInvalid(`--frames "${declared}" is not a positive whole number.`, 'Omit --frames and let the pipeline count the session directory itself.');
+  if (declared !== null && Number(declared) !== counted) {
+    throw inputInvalid(
+      `--frames says ${declared}, but ${session} holds ${counted} image frames.`,
+      'Finish copying the session, or omit --frames and let the pipeline count it.',
+      { declared, counted, session },
+    );
+  }
+  const frames = counted;
 
   const verdict = canTransition(job.state, 'captured');
   if (!verdict.ok) throw inputInvalid(`Cannot register a session on job ${jobId}: ${verdict.reason}`, 'Run `status --job <id>` — a captured job already holds a session.');

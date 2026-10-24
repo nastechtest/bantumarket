@@ -1,0 +1,45 @@
+/*
+ * Reset — lowest specificity in the house.
+ *
+ * Every rule is wrapped in :where() so its specificity is zero: the controller's `styles.css`
+ * and component styles always win without `!important`, and the reduced-motion block in
+ * `reduced-motion.ts` is allowed to be `!important`-free because nothing here fights back.
+ * Values mirror @nastech/design-tokens; layering.test.ts asserts the parity.
+ */
+:where(html) {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:where(body) {
+  margin: 0;
+  min-height: 100vh;
+}
+:where(h1, h2, h3, h4, p, ul, ol, figure, blockquote) {
+  margin: 0;
+}
+:where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+:where(img, video) {
+  max-width: 100%;
+  height: auto;
+}
+:where(svg) {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+:where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+:where(table) {
+  border-collapse: collapse;
+}
+:where([hidden]) {
+  display: none;
+}
+:where(html:focus-within) {
+  scroll-behavior: smooth;
+}

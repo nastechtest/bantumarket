@@ -29,7 +29,7 @@ export interface OverlayRootProps {
   readonly camera: CaptionCamera;
   readonly viewport: Viewport;
   readonly bounds: ConvexBounds;
-  readonly calipers?: readonly Caliper[];
+  readonly calipers?: readonly Caliper[] | undefined;
   readonly children?: ReactNode;
 }
 

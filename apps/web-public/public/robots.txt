@@ -1,0 +1,22 @@
+# NasTech Market robots.txt — one origin, pilot in Johannesburg.
+# Listings and search are public and meant to be found; money surfaces and private states are
+# not crawlable because a crawler holding a snapshot of someone's checkout/handover/dispute state
+# is a privacy incident (POPIA), not an SEO opportunity.
+
+User-agent: *
+Allow: /
+Disallow: /checkout/
+Disallow: /handover/
+Disallow: /dispute/
+Disallow: /sign-in
+Disallow: /account
+Disallow: /api/
+Crawl-delay: 2
+
+# The offline document is a cache artefact, never content.
+Disallow: /offline.html
+
+User-agent: meta-externalagent
+Disallow: /
+
+Sitemap: https://nastech.market/sitemap.xml

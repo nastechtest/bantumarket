@@ -1,0 +1,40 @@
+/*
+ * Scale — CSS mirror of @nastech/design-tokens primitives.
+ *
+ * The TS module is the authority; this file exists so chrome CSS can use variables without a
+ * build step. layout/layering.test.ts parses this file and fails if any value drifts from the
+ * token module, so the mirror is enforced, not hoped at.
+ */
+:root {
+  --nt-ink-900: #0B0D10;
+  --nt-ink-800: #14171B;
+  --nt-ink-700: #1E2329;
+  --nt-ink-500: #3C444D;
+  --nt-ink-300: #7B858F;
+  --nt-ink-100: #D7DCE1;
+  --nt-paper: #FFFFFF;
+  --nt-paper-warm: #F7F5F2;
+  --nt-accent-900: #0A2E5C;
+  --nt-accent-600: #0F62FE;
+  --nt-accent-300: #7FA8E0;
+  --nt-signal-positive: #0E7A4F;
+  --nt-signal-caution: #B05A00;
+  --nt-signal-negative: #A4161A;
+
+  --nt-space-s1: 4px;
+  --nt-space-s2: 8px;
+  --nt-space-s3: 12px;
+  --nt-space-s4: 16px;
+  --nt-space-s5: 24px;
+  --nt-space-s6: 32px;
+  --nt-space-s7: 48px;
+  --nt-space-s8: 64px;
+
+  --nt-radius-sm: 4px;
+  --nt-radius-md: 8px;
+  --nt-radius-lg: 14px;
+  --nt-radius-pill: 999px;
+
+  --nt-gutter: 16px;
+  --nt-content-max: 1180px;
+}

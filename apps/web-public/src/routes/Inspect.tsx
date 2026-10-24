@@ -1,36 +1,14 @@
-import { useMemo, useState } from 'react';
-import { CanvasHost, PosterFallback, probeCapability, canFetchScene, devicePixelRatioCap, selectLod } from '@nastech/ui-3d';
-import { CLAIM_SCOPE_DISCLOSURE } from '@nastech/api-contracts';
-import { PilotWatchPlaceholder } from '../scenes/PilotWatch.js';
-import { fixtureManifest } from '../lib/fixtures.js';
+import type { RouteDef } from '../router.js';
+import { Page as InspectPage } from '../features/inspect/index.js';
 
-/** The scene route class: loaded after the page is interactive, never the entry point of a flow. */
-export default function Inspect() {
-  const cap = useMemo(() => probeCapability(), []);
-  const [gaveUp, setGaveUp] = useState(false);
-  const decision = useMemo(() => selectLod(fixtureManifest), []);
-  const allowed = canFetchScene(cap) && !gaveUp;
-
-  return (
-    <section>
-      <h1>Inspect — Seiko “Presage”</h1>
-      <p className="tier">LOD {decision.tier} · {(decision.bytes / 1_048_576).toFixed(2)} MB · {decision.reason}</p>
-      <div className="scene" style={{ aspectRatio: '4/3' }}>
-        <PosterFallback manifest={fixtureManifest} alt="Seiko Presage, studio poster" />
-        {allowed ? (
-          <div style={{ position: 'absolute', inset: 0 }}>
-            <CanvasHost ariaLabel="3D model of the watch" dprCap={devicePixelRatioCap(cap)} onContextLost={() => setGaveUp(true)}>
-              <PilotWatchPlaceholder />
-            </CanvasHost>
-          </div>
-        ) : (
-          <p className="disclosure" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-            3D is off on this device or connection. The photographs and the condition list below are the same record.
-          </p>
-        )}
-      </div>
-      <p className="disclosure">{CLAIM_SCOPE_DISCLOSURE[fixtureManifest.claimScope]}</p>
-      <p><a href="/item/lst_01">Back to the listing</a></p>
-    </section>
-  );
+/**
+ * Route entry for `/item/:id/inspect` (class `scene`).
+ *
+ * It is a thin shell over the inspect feature so this module — the one the router dynamic-imports for
+ * the scene route — holds no scene imports of its own. The WebGL runtime is reached further down, only
+ * through `features/inspect/inspect-page.tsx`'s lazy `import('./scene-mount.js')`, which is what lets
+ * the fence treat the item page as reaching the scene by navigation and nothing else.
+ */
+export default function Inspect({ route }: { route: RouteDef }) {
+  return <InspectPage route={route} />;
 }

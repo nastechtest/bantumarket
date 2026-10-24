@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Brand mark at app-icon size: ink ground, paper dial, one hairline at 2 o'clock (the pilot pitch: we show the flaws). -->
+  <rect width="512" height="512" rx="96" fill="#0B0D10"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+  <path d="M256 160v96l72 58" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 128l52 52" stroke="#7B858F" stroke-width="18" stroke-linecap="round"/>
+</svg>

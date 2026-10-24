@@ -1,0 +1,70 @@
+/*
+ * Type. No webfont ships here, and none may be added casually: the header lives inside the
+ * 170 KB / first-paint budget (api-contracts `budgets.firstPaintJsKb`), and a blocking font
+ * request costs render-blocking time no byte count captures.
+ *
+ * The brand families are "Ivar Display" and "Söhne", licensed but NOT yet subset. Until the
+ * subsetted, self-hosted woff2 files land in `public/fonts/`, this file references only the
+ * local fallback stack from @nastech/design-tokens — the app renders in Georgia/system-ui and
+ * is honest about it. When the subsets land, add exactly this shape (and layering.test.ts will
+ * refuse any @font-face that forgets the `font-display: optional` line):
+ *
+ *   @font-face {
+ *     font-family: "Ivar Display";
+ *     src: url("/fonts/ivar-display-latin.woff2") format("woff2");
+ *     font-display: optional;
+ *     unicode-range: U+0020-007F, U+2018-201F, U+00A0-00FF;
+ *   }
+ *
+ * `optional`, not `swap`: no second reflow in the buyer's face.
+ *
+ * Icons are inline SVG components (`layout/icons.tsx`), never an icon font — an icon font is
+ * a render-blocking download that spells out meaningless glyphs to a screen reader.
+ */
+:where(:root) {
+  --nt-font-display: "Ivar Display", "Georgia", serif;
+  --nt-font-text: "Söhne", "Inter", system-ui, sans-serif;
+  --nt-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.nt-eyebrow {
+  font-family: var(--nt-font-text);
+  font-size: 0.78rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--nt-ink-500);
+}
+
+.nt-title-1 {
+  font-family: var(--nt-font-display);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+  font-size: clamp(1.75rem, 5.4vw, 2.6rem);
+}
+
+.nt-title-2 {
+  font-family: var(--nt-font-display);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  font-size: clamp(1.3rem, 3.6vw, 1.8rem);
+}
+
+.nt-body {
+  font-family: var(--nt-font-text);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.nt-fine {
+  font-family: var(--nt-font-text);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--nt-ink-500);
+}
+
+.nt-num {
+  font-variant-numeric: tabular-nums;
+}

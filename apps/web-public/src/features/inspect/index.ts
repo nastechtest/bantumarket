@@ -1,0 +1,15 @@
+export { InspectPage, default as Page } from './inspect-page.js';
+export { useInspect, sceneShouldMount, DEFAULT_POSE } from './use-inspect.js';
+export { StaticPath } from './static-path.js';
+export { InspectStatic } from './inspect-error.js';
+export { QualityReadout } from './quality-readout.js';
+export { CaptureMetadata } from './capture-metadata.js';
+export { KeyboardHelp } from './keyboard-help.js';
+export { MeasurePanel, alignmentValid, formatMillimetres } from './measure-panel.js';
+export { SceneOverlays, disclosureBound, overlayBounds } from './condition-overlay.js';
+export { decideInspect, STATIC_REASON_TEXT, type InspectPlan, type StaticReason } from './inspect-decision.js';
+export { qualityTier, type InspectTier, type TierDecision } from './quality-tier.js';
+export { gateBytes, formatMegabytes, type ByteGate } from './byte-gate.js';
+export { lodOptions, describeLod, formatLodSummary, type LodOption } from './lod-picker.js';
+export { encodePose, decodePose, poseShareUrl, POSE_FRAGMENT_KEY } from './share-pose.js';
+export { cameraForPose, type CaptionCamera, type Viewport, type ConvexBounds, type Caliper, type Pose, type Vec3 } from './scene-types.js';

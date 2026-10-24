@@ -10,8 +10,6 @@
  * file exists to remove: red typecheck on tests that pass.
  */
 declare module 'bun:test' {
-  type MatcherCall = (...args: any[]) => void | Promise<void>;
-
   export interface BunAssertionRefs {
     readonly not: BunMatchers;
     readonly resolves: BunMatchers;
@@ -44,7 +42,10 @@ declare module 'bun:test' {
     toThrow(expected?: string | RegExp | Error | (new (...a: any[]) => Error)): void;
     toThrowError(expected?: string | RegExp | Error | (new (...a: any[]) => Error)): void;
     toBeInstanceOf(...args: any[]): void;
-    [name: string]: MatcherCall;
+    // `any`, not a function type: with noUncheckedIndexedAccess every read of an index signature
+    // gains `| undefined`, so a narrowly-typed catch-all makes each matcher Bun adds outside this
+    // list an invoke-error on suites that run green. `Expectation` below already relies on this.
+    [name: string]: any;
   };
 
   export interface Expectation {
@@ -72,4 +73,17 @@ declare module 'bun:test' {
   export function afterAll(fn: () => void | Promise<void>): void;
   export function beforeEach(fn: () => void | Promise<void>): void;
   export function afterEach(fn: () => void | Promise<void>): void;
+
+  /**
+   * Bun's `mock()` exists at runtime and suites here use it; the shim predated the first one, so
+   * the call sites typechecked red while running green — the exact failure this file exists to
+   * remove. `mock.calls` is the part suites actually read, so it is typed; the rest of Bun's mock
+   * surface stays as permissive as the matchers above.
+   */
+  export interface MockFunction<T extends (...args: any[]) => any> {
+    (...args: Parameters<T>): ReturnType<T>;
+    readonly mock: { readonly calls: Parameters<T>[] };
+  }
+
+  export function mock<T extends (...args: any[]) => any>(impl?: T): MockFunction<T> & Record<string, any>;
 }

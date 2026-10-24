@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable: full-bleed ink ground, dial kept inside the ~80% safe zone so launchers can crop. -->
+  <rect width="512" height="512" fill="#0B0D10"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+  <path d="M256 184v72l54 44" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,11 +1,7 @@
 import type { RouteDef } from '../router.js';
+import Page from '../features/auth/index.js';
 
-/** Wired by the web-seller wave; budget class 'critical'. */
-export default function SignIn({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Sign in — not yet implemented.</p>
-    </section>
-  );
+/** `/sign-in` — class `critical`. */
+export default function SignInRoute({ route }: { route: RouteDef }) {
+  return <Page route={route} />;
 }

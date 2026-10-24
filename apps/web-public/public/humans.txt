@@ -1,0 +1,19 @@
+/* NasTech Market — humans.txt
+ * Built in Johannesburg, South Africa, by a small team that photographs watches at 48 angles
+ * and writes down every scratch.
+ *
+ * The tech
+ * - Standards: HTML5, CSS3, ES2022
+ * - Compiled with: Vite + TypeScript (strict), React 18
+ * - Money lives in: a PHP ledger with commit-time invariants; this app never decides what a
+ *   cent is worth, it renders what the ledger says.
+ * - 3D is optional forever: every flow completes with no WebGL at all. If you came here for
+ *   the spin, the spin is the garnish, not the meal.
+ *
+ * The team
+ * - Engineering, capture studio, trust & safety, ledger. Names at /legal/humans once ops
+ *   finishes the list (the placeholder is honest: this file ships before the page does).
+ *
+ * Language: English (en-ZA), Afrikaana and isiZulu listings kept as the seller wrote them.
+ * Timezone: SAST (UTC+2). Payments: ZAR only.
+ */

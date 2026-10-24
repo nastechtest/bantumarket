@@ -1,0 +1,22 @@
+{
+  "name": "@nastech/tree-conformance",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Structural gate: route completeness, feature/app/package isolation, authored JS, one main per route, size, and critical-route guard tests.",
+  "main": "./src/checker.ts",
+  "types": "./src/checker.ts",
+  "exports": {
+    ".": "./src/checker.ts",
+    "./*": "./src/*.ts"
+  },
+  "bin": {
+    "nastech-tree-conformance": "./check.ts"
+  },
+  "scripts": {
+    "check": "bun ./check.ts",
+    "self-test": "bun ./check.ts --self-test",
+    "test": "bun test .",
+    "typecheck": "tsc --noEmit"
+  }
+}

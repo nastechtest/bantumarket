@@ -35,6 +35,15 @@ export class IdempotencyKeys {
   }
 
   /**
+   * Re-register a key this registry did not mint. A remount builds a fresh registry while the
+   * order's persisted record still names the key already in flight on the wire; adopting it keeps
+   * "the page came back" from becoming a second capture.
+   */
+  adopt(intent: IntentId, key: string): void {
+    this.byIntent.set(intent, key);
+  }
+
+  /**
    * The intent reached a settled outcome and a repeat of it is now a *new* intent — release its
    * key so the next mint is fresh. Callers must NOT release on retryable failures (network,
    * timeout, providerUnavailable): the server may already have done the work under that key,

@@ -20,6 +20,7 @@ export {
   MEMORY_MODEL,
 } from './memory-pressure.js';
 export type { Capability, GlSupport } from './capability.js';
+export { LEVEL_LADDER, type GovernorLevel } from './governor-level.js';
 export type { LodDecision, BudgetVerdict } from './lod-selection.js';
 export type {
   Clock,

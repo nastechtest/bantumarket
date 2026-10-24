@@ -15,9 +15,9 @@ import { useEffect, useRef } from 'react';
  * loop from inside a demand-mode canvas.
  */
 
-export type GovernorLevel = 'full' | 'dpr' | 'pixel' | 'lod' | 'stopped';
+import { LEVEL_LADDER, type GovernorLevel } from '../quality/governor-level.js';
 
-export const LEVEL_LADDER: readonly GovernorLevel[] = ['full', 'dpr', 'pixel', 'lod', 'stopped'];
+export { LEVEL_LADDER, type GovernorLevel };
 
 /** Pixel-ratio multipliers applied to the session DPR cap at each rung. */
 export const PIXEL_RATIO_SCALE: Readonly<Record<GovernorLevel, number>> = {

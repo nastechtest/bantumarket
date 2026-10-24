@@ -14,7 +14,7 @@
     "nastech-capture": "./cli.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit index.ts",
+    "typecheck": "tsc --noEmit",
     "test": "bun test .",
     "capture": "bun ./cli.ts"
   }

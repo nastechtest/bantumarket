@@ -99,6 +99,49 @@ export type CaptureJobState =
   | 'failed'
   | 'reshot';
 
+/**
+ * The order ladder as the PHP ledger writes it. The wire is a string enum, so the contract is a
+ * union of string literals; `IN_DISPUTE` is a real state, not an overlay on `PAID`.
+ */
+export type OrderState =
+  | 'AWAITING_PAYMENT'
+  | 'PAID'
+  | 'HANDOVER_SCHEDULED'
+  | 'HANDOVER_CONFIRMED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'REFUND_PENDING'
+  | 'REFUNDED'
+  | 'IN_DISPUTE';
+
+export const ORDER_STATES: readonly OrderState[] = [
+  'AWAITING_PAYMENT',
+  'PAID',
+  'HANDOVER_SCHEDULED',
+  'HANDOVER_CONFIRMED',
+  'COMPLETED',
+  'CANCELLED',
+  'REFUND_PENDING',
+  'REFUNDED',
+  'IN_DISPUTE',
+];
+
+/** The frame governor's ladder. Vocabulary, so a first-paint analytics module can name a rung. */
+export type GovernorLevel = 'full' | 'dpr' | 'pixel' | 'lod' | 'stopped';
+
+/**
+ * What the scene runtime reports about one inspection, when it has something to report. Every
+ * timing is nullable: an unmeasured field is `null`, never zero, so a gate fails honestly.
+ */
+export interface SceneTelemetrySnapshot {
+  readonly firstPaintMs: number | null;
+  readonly sceneReadyMs: number | null;
+  readonly governorLevel: GovernorLevel | null;
+  readonly lodTier: LodTier | null;
+  readonly bytesFetched: number;
+  readonly contextLost: boolean;
+}
+
 export interface ListingSummary {
   readonly id: string;
   readonly title: string;

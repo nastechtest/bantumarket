@@ -1,0 +1,39 @@
+/*
+ * Chrome motion. Durations/easing come from the @nastech/motion CSS variables (the controller
+ * emits them into the global sheet via motion's `motionCss()`); the fallbacks below are the
+ * token values themselves, so chrome still animates to brand spec before the generated block
+ * lands — and reduced-motion.ts zeroes the variables, so zeroing here is automatic.
+ *
+ * Rule of the house: only *appearance* transitions live here. Nothing that communicates that a
+ * state changed (payment confirmed, handover done) may rely on a class in this file — that
+ * motion belongs to the component and is classified `feedback` in @nastech/motion.
+ */
+.nt-header--hiding {
+  transform: translateY(-100%);
+}
+.nt-header {
+  transition: transform var(--motion-standard, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.nt-tab-bar__item:active {
+  transform: scale(0.97);
+}
+.nt-tab-bar__item {
+  transition: transform var(--motion-quick, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.nt-offline-banner {
+  animation: nt-offline-in var(--motion-standard, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+@keyframes nt-offline-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Decorative-only flourish gets the ambient marker; reduced motion switches it off by identity. */
+[data-nt-ambient] {
+  animation-duration: var(--motion-slow, 400ms);
+}

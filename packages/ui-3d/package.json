@@ -10,7 +10,9 @@
     "./fallback": "./src/fallback/index.ts",
     "./quality": "./src/quality/index.ts",
     "./tokens": "./src/tokens/index.ts",
-    "./scene": "./src/viewer/index.ts"
+    "./scene": "./src/viewer/index.ts",
+    "./overlays": "./src/overlays/index.ts",
+    "./controls": "./src/controls/index.ts"
   },
   "dependencies": {
     "three": "0.169.0",

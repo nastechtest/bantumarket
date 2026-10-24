@@ -1,0 +1,49 @@
+/*
+ * Print. A receipt, a policy, or a condition disclosure must print legibly and completely —
+ * this is a legal document the moment someone hands it over a counter. Chrome disappears; the
+ * evidence text and the ledger reference stay, because the dispute process reads the same text.
+ */
+@media print {
+  :root {
+    --nt-print-ink: #0B0D10;
+  }
+  .nt-header,
+  .nt-footer,
+  .nt-tab-bar,
+  .nt-skip-link,
+  .nt-sticky-buy,
+  .nt-offline-banner,
+  .nt-consent-slot,
+  .nt-account-menu__popover {
+    display: none !important;
+  }
+  @page {
+    margin: 18mm;
+  }
+  body {
+    background: #FFFFFF;
+    color: var(--nt-print-ink);
+  }
+  .nt-print-keep,
+  .disclosure,
+  [data-ledger-ref],
+  [data-disclosure-text] {
+    display: block !important;
+    visibility: visible !important;
+    color: var(--nt-print-ink) !important;
+    background: transparent !important;
+    border-color: currentColor !important;
+  }
+  /* A printed link the reader cannot click is a dead end: spell the target out, content only. */
+  main a[href^="/"]::after,
+  main a[href^="https://nastech.market"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75em;
+    color: var(--nt-print-ink);
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+}
