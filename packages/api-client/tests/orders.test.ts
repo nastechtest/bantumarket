@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { money } from '@nastech/api-contracts';
 import { ApiError } from '../src/errors.js';
 import {

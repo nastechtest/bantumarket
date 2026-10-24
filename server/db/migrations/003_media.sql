@@ -319,10 +319,9 @@ GRANT SELECT ON ALL TABLES IN SCHEMA media TO nastech_app;
 ALTER FUNCTION media.assert_asset_version_monotonic() OWNER TO nastech_owner;
 ALTER FUNCTION media.assert_asset_key_follows_digest() OWNER TO nastech_owner;
 ALTER FUNCTION media.assert_asset_may_be_deleted() OWNER TO nastech_owner;
-ALTER TRIGGER assets_version_monotonic ON media.assets OWNER TO nastech_owner;
-ALTER TRIGGER assets_key_follows_digest ON media.assets OWNER TO nastech_owner;
-ALTER TRIGGER assets_evidence_row_cannot_be_deleted ON media.assets OWNER TO nastech_owner;
-ALTER TRIGGER digest_verifications_append_only ON media.digest_verifications OWNER TO nastech_owner;
+-- No `ALTER TRIGGER ... OWNER TO` here: a trigger has no owner of its own — it fires with the table's
+-- owner — and PostgreSQL has no such statement. It was in this file, and it failed the migration the
+-- first time the DDL was applied to a real server.
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA media GRANT SELECT ON TABLES TO nastech_app;
 

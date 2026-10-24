@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import type { AssetManifest } from '@nastech/api-contracts';
 import { CLAIM_SCOPE_DISCLOSURE } from '@nastech/api-contracts';
 import { ApiError } from '../src/errors.js';

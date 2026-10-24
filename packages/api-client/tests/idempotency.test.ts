@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { IdempotencyKeys, generateIdempotencyKey, orderIntent } from '../src/idempotency.js';
 import { ApiError } from '../src/errors.js';
 import { createOrdersApi } from '../src/orders.js';

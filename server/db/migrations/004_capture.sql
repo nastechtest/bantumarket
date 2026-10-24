@@ -714,10 +714,9 @@ ALTER FUNCTION capture.invariant_closed_job_has_cost() OWNER TO nastech_owner;
 ALTER FUNCTION capture.invariant_published_listing_is_charged() OWNER TO nastech_owner;
 ALTER FUNCTION capture.invariant_capture_was_calibrated() OWNER TO nastech_owner;
 ALTER FUNCTION capture.invariant_publication_had_two_eyes() OWNER TO nastech_owner;
-ALTER TRIGGER custody_entries_append_only ON capture.custody_entries OWNER TO nastech_owner;
-ALTER TRIGGER calibrations_append_only ON capture.calibrations OWNER TO nastech_owner;
-ALTER TRIGGER cost_records_append_only ON capture.cost_records OWNER TO nastech_owner;
-ALTER TRIGGER qc_assessments_append_only ON capture.qc_assessments OWNER TO nastech_owner;
+-- No `ALTER TRIGGER ... OWNER TO` here: a trigger has no owner of its own — it fires with the table's
+-- owner — and PostgreSQL has no such statement. It was in this file, and it failed the migration the
+-- first time the DDL was applied to a real server.
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA capture GRANT SELECT ON TABLES TO nastech_app;
 

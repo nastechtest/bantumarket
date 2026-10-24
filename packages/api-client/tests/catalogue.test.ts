@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { ApiError } from '../src/errors.js';
 import { getListingSummary, searchCatalogue } from '../src/catalogue.js';
 import { FakeTransport, listingSummaryFixture } from './fake-transport.js';
