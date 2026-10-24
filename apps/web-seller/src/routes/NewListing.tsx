@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { NewListingPage } from '../features/listings/new-listing-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/listings/new` — class `app`. */
 export default function NewListing({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>New listing — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <NewListingPage />;
 }

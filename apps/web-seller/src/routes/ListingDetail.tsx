@@ -1,11 +1,9 @@
-import type { RouteDef } from '../router.js';
+import { stripBase, type RouteDef } from '../router.js';
+import { pathParam } from '../lib/path-param.js';
+import { ListingDetailPage } from '../features/listings/listing-detail-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/listings/:id` — class `app`. Resolves `:id` from the concrete pathname. */
 export default function ListingDetail({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Listing — not yet implemented.</p>
-    </section>
-  );
+  const pathname = typeof window === 'undefined' ? '' : stripBase(window.location.pathname);
+  return <ListingDetailPage listingId={pathParam(route.path, 'id', pathname)} />;
 }

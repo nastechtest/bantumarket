@@ -43,6 +43,31 @@ export const Routes: readonly RouteDef[] = [
 
 export const FORBIDDEN_CLASSES: readonly RouteClass[] = ['critical', 'app'];
 
+/**
+ * This app can be mounted under a path prefix (`/seller/`, `/staff/`) so one deployment serves all
+ * three products from one origin. At the root `BASE` is `''`, so nothing about local development or
+ * the separate-project deployment changes. Every history entry and route match goes through the two
+ * helpers below, which is what makes the prefix a build flag instead of a rewrite of the app.
+ *
+ * The cast is deliberate: `import.meta.env` is typed by Vite for the build and undefined under
+ * `bun test`, and a router that throws in a test because of its own base path is a router that has
+ * coupled the test harness to the bundler.
+ */
+const BASE = ((import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/').replace(/\/+$/, '');
+
+/** `/seller/item/7` with base `/seller` → `/item/7`. An unprefixed path is returned as it came in. */
+export function stripBase(pathname: string, base: string = BASE): string {
+  if (base === '') return pathname;
+  if (pathname === base) return '/';
+  return pathname.startsWith(`${base}/`) ? pathname.slice(base.length) : pathname;
+}
+
+/** `/item/7` with base `/seller` → `/seller/item/7`. Used for every pushState. */
+export function withBase(path: string, base: string = BASE): string {
+  const normalised = path.startsWith('/') ? path : `/${path}`;
+  return base === '' ? normalised : `${base}${normalised}`;
+}
+
 const listeners = new Set<() => void>();
 function emit() {
   for (const l of listeners) l();
@@ -56,7 +81,7 @@ document.addEventListener('click', (e) => {
 });
 
 export function navigate(path: string) {
-  window.history.pushState({}, '', path);
+  window.history.pushState({}, '', withBase(path));
   emit();
 }
 
@@ -86,7 +111,7 @@ export function useRoute(): RouteDef {
   return resolve(
     useSyncExternalStore(
       subscribe,
-      () => window.location.pathname,
+      () => stripBase(window.location.pathname),
       () => '/',
     ),
   );

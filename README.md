@@ -78,3 +78,25 @@ No card number, OTP, bank account, or survivor's detail is written to a log, aud
 message or fixture. Bank details never travel in a URL. Staff impersonation is bounded and audited.
 Analytics is closed-schema: a prop that cannot be expressed in the schema is rejected, and no
 behavioural event leaves a device without an explicit consent decision.
+
+## Deployment (Vercel)
+
+The project `bantumarket` builds one output tree serving all three apps from one origin:
+
+| Path | App |
+| --- | --- |
+| `/` | `apps/web-public` (the marketplace) |
+| `/seller` | `apps/web-seller` |
+| `/staff` | `apps/web-staff` |
+
+`vercel.json` points the build at [scripts/build-vercel.ts](scripts/build-vercel.ts), which builds each
+app with `APP_BASE` set and assembles `vercel-out/`. Assets are content-hashed and served
+`immutable`; every route falls back to its own app's `index.html`, so `/seller/listings/42` survives a
+reload.
+
+To split them into three projects instead, set each project's Root Directory to `apps/<name>` and
+leave `APP_BASE` unset — the apps are unchanged at the root.
+
+The PHP API in `server/` is not deployed to Vercel (Vercel does not run PHP); it needs a PHP host and
+a PostgreSQL 16 instance. The frontends currently read labelled fixtures, so the preview is a working
+product, not a wired one.

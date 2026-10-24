@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { PayoutsPage } from '../features/payouts/payouts-page.js';
 
-/** Wired by the web-seller wave; budget class 'critical'. */
+/** `/payouts` — class `critical`. The shell refuses the page without a seller session. */
 export default function Payouts({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Payouts — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <PayoutsPage />;
 }

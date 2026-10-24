@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./fallback": "./src/fallback/index.ts",
+    "./assets": "./src/assets/index.ts",
     "./quality": "./src/quality/index.ts",
     "./tokens": "./src/tokens/index.ts",
     "./scene": "./src/viewer/index.ts",

@@ -1,11 +1,9 @@
-import type { RouteDef } from '../router.js';
+import { stripBase, type RouteDef } from '../router.js';
+import { pathParam } from '../lib/path-param.js';
+import { CapturePreviewPage } from '../features/listings/capture-preview-page.js';
 
-/** Wired by the web-seller wave; budget class 'scene'. */
+/** `/listings/:id/capture` — class `scene`. The review screen itself uses no scene runtime. */
 export default function CapturePreview({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Capture preview — not yet implemented.</p>
-    </section>
-  );
+  const pathname = typeof window === 'undefined' ? '' : stripBase(window.location.pathname);
+  return <CapturePreviewPage listingId={pathParam(route.path, 'id', pathname)} />;
 }

@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { OnboardingPage } from '../features/onboarding/onboarding-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/onboarding` — class `app`. */
 export default function Onboarding({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Get started — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <OnboardingPage />;
 }

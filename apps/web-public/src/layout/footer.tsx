@@ -34,6 +34,9 @@ export function Footer({ support }: { readonly support: SupportContact | null })
       >
         <PolicyLinks />
         <div style={{ display: 'flex', gap: raw.space.s4, flexWrap: 'wrap', alignItems: 'baseline' }}>
+          <a href="/help" style={{ color: tokens.text.secondary, textDecoration: 'underline' }}>
+            Help and fees
+          </a>
           <a href="/legal/humans" style={{ color: tokens.text.secondary, textDecoration: 'underline' }}>
             Team
           </a>

@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { SettingsPage } from '../features/settings/settings-page.js';
 
-/** Wired by the web-seller wave; budget class 'critical'. */
+/** `/settings` — class `critical`. The shell refuses the page without a seller session. */
 export default function Settings({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Settings — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <SettingsPage />;
 }

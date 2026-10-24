@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generator": "tooling/models/build-models.ts",
+  "unitsPerMeter": 1,
+  "assets": [
+    {
+      "id": "wristwatch",
+      "file": "wristwatch.gltf",
+      "bytes": 45911,
+      "triangles": 428,
+      "materials": 5,
+      "clip": "inspect-turntable",
+      "unitsPerMeter": 1
+    },
+    {
+      "id": "smartphone",
+      "file": "smartphone.gltf",
+      "bytes": 35027,
+      "triangles": 300,
+      "materials": 4,
+      "clip": "inspect-turntable",
+      "unitsPerMeter": 1
+    },
+    {
+      "id": "parka",
+      "file": "parka.gltf",
+      "bytes": 53398,
+      "triangles": 652,
+      "materials": 3,
+      "clip": "inspect-turntable",
+      "unitsPerMeter": 1
+    }
+  ]
+}

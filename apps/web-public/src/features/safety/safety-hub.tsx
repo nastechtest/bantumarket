@@ -62,7 +62,7 @@ export const HUB_SECTIONS: readonly { readonly path: string; readonly title: str
 
 export function SafetyHub() {
   return (
-    <main
+    <section
       className="safety-hub"
       style={{ fontFamily: raw.type.familyText, color: tokens.text.primary, maxWidth: '66ch' }}
     >
@@ -115,6 +115,6 @@ export function SafetyHub() {
         In immediate danger: <strong>10111</strong> (SAPS) — this site is not an emergency line and
         no queue here is faster than one.
       </p>
-    </main>
+    </section>
   );
 }

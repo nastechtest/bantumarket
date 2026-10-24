@@ -15,6 +15,8 @@ const threeStub = resolve(here, 'src/build/no3d-three.ts');
 const fiberStub = resolve(here, 'src/build/no3d-fiber.tsx');
 
 export default defineConfig({
+  // Set by scripts/build-vercel.ts so one deployment can host all three apps under one origin.
+  base: process.env.APP_BASE ?? '/',
   plugins: [react()],
   define: { __NO_3D__: JSON.stringify(no3d) },
   resolve: {

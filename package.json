@@ -11,7 +11,7 @@
   "scripts": {
     "build": "bun run --filter './apps/*' build",
     "typecheck": "bun run --filter '*' typecheck",
-    "test": "bun test packages apps tooling",
+    "test": "bun scripts/run-tests.ts",
     "check:tree": "bun tooling/tree-conformance/check.ts",
     "check:boundaries": "bun scripts/check-3d-boundaries.ts",
     "check:boundaries:self-test": "bun scripts/check-3d-boundaries.ts --self-test",

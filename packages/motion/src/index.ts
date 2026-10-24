@@ -42,3 +42,29 @@ export {
 export { focusRing, FOCUS_RING_CSS } from './focus-ring.js';
 
 export { motionCss, reducedMotionCss, motionVarNames, defaultVarsMatchTokens } from './css-vars.js';
+
+/**
+ * Keyframes. `keyframes.ts` also names its generator `motionCss`; the barrel alias
+ * `keyframeCss` keeps the existing `motionCss` (custom properties + reduce block) stable for
+ * the apps that already paste it.
+ */
+export {
+  animationNames,
+  animations,
+  animationClassName,
+  animationCss,
+  iterations,
+  motionCss as keyframeCss,
+  type AnimationName,
+  type AnimationIteration,
+  type KeyframeAnimation,
+} from './keyframes.js';
+
+export {
+  PRESENCE_ENTER_CLASS,
+  PRESENCE_EXIT_CLASS,
+  createPresence,
+  type Presence,
+  type PresenceOptions,
+  type PresencePhase,
+} from './presence.js';

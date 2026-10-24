@@ -1,11 +1,9 @@
-import type { RouteDef } from '../router.js';
+import { stripBase, type RouteDef } from '../router.js';
+import { pathParam } from '../lib/path-param.js';
+import { ConversationPage } from '../features/messages/conversation-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/messages/:threadId` — class `app`. */
 export default function Conversation({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Conversation — not yet implemented.</p>
-    </section>
-  );
+  const pathname = typeof window === 'undefined' ? '' : stripBase(window.location.pathname);
+  return <ConversationPage threadId={pathParam(route.path, 'threadId', pathname)} />;
 }

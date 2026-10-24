@@ -1,11 +1,9 @@
-import type { RouteDef } from '../router.js';
+import { stripBase, type RouteDef } from '../router.js';
+import { NotFoundPage } from '../features/not-found/not-found-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `*` — class `app`. Shows the requested path and real recovery destinations. */
 export default function NotFound({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Not found — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  const pathname = typeof window === 'undefined' ? '/' : stripBase(window.location.pathname);
+  return <NotFoundPage path={pathname} />;
 }

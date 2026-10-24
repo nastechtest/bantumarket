@@ -13,3 +13,7 @@ coverage/
 # repository was made, not part of what it ships.
 .superpowers/
 apps/*/dist-no3d/
+vercel-out/
+.vercel/
+.vercel
+.env*

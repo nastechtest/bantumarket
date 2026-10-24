@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { ListingsPage } from '../features/listings/listings-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/listings` — class `app`. The feature owns the screen; this file is the router seam. */
 export default function Listings({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>My listings — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <ListingsPage />;
 }

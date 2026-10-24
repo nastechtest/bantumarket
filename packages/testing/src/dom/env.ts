@@ -68,6 +68,29 @@ let handle: DomHandle | null = null;
 export function installDom(): DomHandle {
   if (handle !== null) return handle;
 
+  // Another helper — each package ships its own `dom-setup` — may already have installed a window.
+  // Adopt it instead of stacking a second jsdom: replacing the globals leaves a `win` captured at
+  // import time pointing at a dead window, which is how the Sheet scroll-lock test started reading
+  // `scrollY` as 0 while the component read the new window.
+  const preinstalled = (globalThis as { document?: Document }).document;
+  if (preinstalled !== undefined) {
+    let registered: { unmount(): void } | null = null;
+    handle = {
+      window: globalThis.window as Window & typeof globalThis,
+      document: preinstalled,
+      root: () => preinstalled.body as HTMLElement,
+      register: (tree) => {
+        registered = tree;
+      },
+      reset: () => {
+        registered?.unmount();
+        registered = null;
+      },
+      restore: () => undefined,
+    };
+    return handle;
+  }
+
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
     pretendToBeVisual: true,
     url: 'https://market.test/',

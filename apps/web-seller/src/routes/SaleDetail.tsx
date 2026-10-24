@@ -1,11 +1,9 @@
-import type { RouteDef } from '../router.js';
+import { stripBase, type RouteDef } from '../router.js';
+import { pathParam } from '../lib/path-param.js';
+import { SaleDetailPage } from '../features/sales/sale-detail-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/orders/:id` — class `app`. */
 export default function SaleDetail({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Sale — not yet implemented.</p>
-    </section>
-  );
+  const pathname = typeof window === 'undefined' ? '' : stripBase(window.location.pathname);
+  return <SaleDetailPage saleId={pathParam(route.path, 'id', pathname)} />;
 }

@@ -1,3 +1,4 @@
+import { installDomGlobal } from './dom.js';
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { readFileSync, readdirSync } from 'node:fs';
 import type { Dirent } from 'node:fs';
@@ -6,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import { act } from 'react-dom/test-utils';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
-import { win } from './dom.js';
 import { Routes } from '../router.js';
 import type { RouteDef } from '../router.js';
 import type { StaffSession } from '../shell/session.js';
@@ -53,7 +53,8 @@ function sourceFiles(directory: string): readonly string[] {
 const SRC = fileURLToPath(new URL('..', import.meta.url));
 
 beforeEach(() => {
-  win.localStorage.clear();
+  installDomGlobal();
+  localStorage.clear();
 });
 
 afterEach(() => {
@@ -173,11 +174,11 @@ describe('density preference', () => {
     );
     expect(toggle).toBeDefined();
     act(() => {
-      toggle!.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+      toggle!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(shell?.dataset['density']).toBe('compact');
     expect(toggle?.getAttribute('aria-pressed')).toBe('true');
-    expect(win.localStorage.getItem('nastech.staff.density.v1')).toBe('compact');
+    expect(localStorage.getItem('nastech.staff.density.v1')).toBe('compact');
 
     const second = renderLive(route);
     expect(second.querySelector<HTMLElement>('.ops-shell')?.dataset['density']).toBe('compact');

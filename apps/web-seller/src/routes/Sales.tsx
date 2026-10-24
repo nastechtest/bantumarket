@@ -1,11 +1,8 @@
 import type { RouteDef } from '../router.js';
+import { SalesPage } from '../features/sales/sales-page.js';
 
-/** Wired by the web-seller wave; budget class 'app'. */
+/** `/orders` — class `app`. */
 export default function Sales({ route }: { route: RouteDef }) {
-  return (
-    <section>
-      <h1>{route.label}</h1>
-      <p>Sales — not yet implemented.</p>
-    </section>
-  );
+  void route;
+  return <SalesPage />;
 }

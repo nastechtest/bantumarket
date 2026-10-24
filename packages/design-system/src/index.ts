@@ -15,3 +15,16 @@ export type { SheetProps } from './sheet.js';
 export { Stepper } from './stepper.js';
 export type { Step } from './stepper.js';
 export { PolicyLinks, POLICY_LINKS } from './policy-links.js';
+
+/**
+ * Motion primitives. Appended, never reordered: the existing surface above stays byte-stable
+ * so apps importing by name are unaffected.
+ */
+export { Skeleton, motionSkeletonCss } from './motion/skeleton.js';
+export type { SkeletonProps } from './motion/skeleton.js';
+export { PageTransition, motionPageCss } from './motion/page-transition.js';
+export type { PageTransitionProps } from './motion/page-transition.js';
+export { Spinner, motionSpinnerCss } from './motion/spinner.js';
+export type { SpinnerProps } from './motion/spinner.js';
+export { Toast, motionToastCss } from './motion/toast.js';
+export type { ToastProps, ToastTone } from './motion/toast.js';

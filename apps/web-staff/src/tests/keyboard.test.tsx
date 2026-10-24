@@ -1,8 +1,8 @@
+import { installDomGlobal } from './dom.js';
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { act, Simulate } from 'react-dom/test-utils';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
-import { win } from './dom.js';
 import { Routes } from '../router.js';
 import type { RouteDef } from '../router.js';
 import { ConsoleFrame } from '../layout/console-frame.js';
@@ -28,8 +28,8 @@ function mount(session = allCapabilitiesSession(), route: RouteDef = HOME): HTML
   return host;
 }
 
-function press(key: string, target: EventTarget = win, init: KeyboardEventInit = {}): KeyboardEvent {
-  const event = new win.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
+function press(key: string, target: EventTarget = window, init: KeyboardEventInit = {}): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
   target.dispatchEvent(event);
   return event;
 }
@@ -50,8 +50,9 @@ function paletteInput(): HTMLInputElement {
 }
 
 beforeEach(() => {
-  win.history.replaceState({}, '', '/');
-  win.localStorage.clear();
+  installDomGlobal();
+  window.history.replaceState({}, '', '/');
+  localStorage.clear();
 });
 
 afterEach(() => {
@@ -59,7 +60,7 @@ afterEach(() => {
     act(() => root.unmount());
   }
   document.body.replaceChildren();
-  win.history.replaceState({}, '', '/');
+  window.history.replaceState({}, '', '/');
 });
 
 describe('command palette', () => {
@@ -110,7 +111,7 @@ describe('command palette', () => {
     mount();
     openPalette();
     const input = paletteInput();
-    const setValue = Object.getOwnPropertyDescriptor(win.HTMLInputElement.prototype, 'value')!.set!;
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
     act(() => {
       setValue.call(input, 'payout');
       // Simulate, not a dispatched `input`: react-dom's module-init DOM snapshot leaves its
@@ -133,18 +134,18 @@ describe('command palette', () => {
 describe('navigation shortcuts', () => {
   it('navigates on a g-chord only when the destination is visible', () => {
     mount(reviewerSession());
-    win.history.replaceState({}, '', '/sign-in');
+    window.history.replaceState({}, '', '/sign-in');
     act(() => {
       press('g');
       press('p');
     });
-    expect(win.location.pathname).toBe('/sign-in');
+    expect(window.location.pathname).toBe('/sign-in');
 
     act(() => {
       press('g');
       press('q');
     });
-    expect(win.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/');
   });
 
   it('navigates to a permitted section on its chord', () => {
@@ -153,7 +154,7 @@ describe('navigation shortcuts', () => {
       press('g');
       press('p');
     });
-    expect(win.location.pathname).toBe('/payouts');
+    expect(window.location.pathname).toBe('/payouts');
   });
 
   it('refuses critical chords during impersonation but keeps ordinary ones', () => {
@@ -162,18 +163,18 @@ describe('navigation shortcuts', () => {
       press('g');
       press('p');
     });
-    expect(win.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/');
     act(() => {
       press('g');
       press('a');
     });
-    expect(win.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/');
 
     act(() => {
       press('g');
       press('d');
     });
-    expect(win.location.pathname).toBe('/disputes');
+    expect(window.location.pathname).toBe('/disputes');
   });
 
   it('ignores shortcuts while the operator is typing in a field', () => {
@@ -185,7 +186,7 @@ describe('navigation shortcuts', () => {
       press('p', input);
       press('?', input);
     });
-    expect(win.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/');
     expect(document.querySelector('[data-testid="command-palette"]')).toBeNull();
   });
 
@@ -195,10 +196,10 @@ describe('navigation shortcuts', () => {
     let modified: KeyboardEvent | null = null;
     act(() => {
       g = press('g');
-      modified = press('p', win, { ctrlKey: true });
+      modified = press('p', window, { ctrlKey: true });
     });
     expect(g!.defaultPrevented).toBe(false);
     expect(modified!.defaultPrevented).toBe(false);
-    expect(win.location.pathname).toBe('/');
+    expect(window.location.pathname).toBe('/');
   });
 });
