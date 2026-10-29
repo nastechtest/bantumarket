@@ -19,7 +19,7 @@ interface AssetEntry {
   readonly unitsPerMeter: number;
 }
 
-const dir = join(import.meta.dir, '..', '..', 'public', 'models');
+const dir = join(import.meta.dir, '..', '..', 'public', 'assets', 'models');
 
 describe('shipped 3D models', () => {
   const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')) as { assets: readonly AssetEntry[] };

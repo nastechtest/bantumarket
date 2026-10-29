@@ -24,6 +24,7 @@ export default defineConfig({
       ? [
           { find: /^@nastech\/ui-3d$/, replacement: stub },
           { find: /^@nastech\/ui-3d\/scene$/, replacement: stub },
+          { find: /^@nastech\/ui-3d\/assets$/, replacement: stub },
           { find: /^three$/, replacement: threeStub },
           { find: /^@react-three\/fiber$/, replacement: fiberStub },
           { find: /^@react-three\/.*/, replacement: stub },

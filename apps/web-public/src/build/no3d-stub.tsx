@@ -18,6 +18,16 @@ export const CanvasHost = (_props: { children?: ReactNode; ariaLabel: string; dp
  */
 export const SceneHost = (_props: Record<string, unknown>) => null;
 export const LightingRig = () => null;
+/**
+ * The glTF loader is aliased here in NO_3D builds too: importing the real one would put three's
+ * GLTFLoader in an artefact whose entire purpose is to contain no renderer. The URL helper stays
+ * real because it is a string function and the static path still links to the asset.
+ */
+export const GltfAsset = (_props: Record<string, unknown>) => null;
+export const resolveAssetUrl = (id: string, options: { base?: string } = {}) => {
+  const base = (options.base ?? '/').replace(/\/+$/, '');
+  return `${base}/assets/models/${id}.gltf`;
+};
 export const PosterFallback = RealPoster;
 export const TurntableSprite = RealSprite;
 export const probeCapability = () => UNSUPPORTED;

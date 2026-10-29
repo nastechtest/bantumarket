@@ -56,6 +56,10 @@ export function InspectPage({ route }: { route: RouteDef }) {
         <Suspense fallback={staticPath}>
           <SceneMount
             manifest={manifest}
+            /* The pilot fixture listing is the watch the placeholder always depicted, so naming the
+               model here is a statement of fact about this item. When manifests carry a category the
+               explicit prop goes away and `modelForAsset` decides. */
+            model="wristwatch"
             capability={capability}
             staticPath={staticPath}
             alt={alt}

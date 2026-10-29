@@ -7,6 +7,8 @@ import { LightingRig, SceneHost } from '@nastech/ui-3d/scene';
 // page, so none of these bytes land in the item page's or home's chunk; when the controller adds the
 // `./overlays` and `./controls` exports this file builds unchanged.
 import { OverlayRoot } from '@nastech/ui-3d/overlays';
+import { GltfAsset, resolveAssetUrl } from '@nastech/ui-3d/assets';
+import { modelForAsset } from './model-choice.js';
 import { ControlsProvider, KEY_HELP, ViewerControls, type CameraView } from '@nastech/ui-3d/controls';
 import { PilotWatchPlaceholder } from '../../scenes/PilotWatch.js';
 import { SceneOverlays } from './condition-overlay.js';
@@ -38,6 +40,8 @@ export interface SceneMountProps {
   readonly alt: string;
   readonly pose: Pose;
   readonly onPoseChange: (pose: Pose) => void;
+  /** Explicit model when the page knows the category; otherwise the manifest id decides. */
+  readonly model?: string | null;
   readonly onContextLost: (reason: string) => void;
 }
 
@@ -60,7 +64,7 @@ function useElementSize(ref: React.RefObject<HTMLDivElement>): Viewport {
 
 const DEFAULT_VIEW: CameraView = { azimuthDeg: 0, polarDeg: 72, zoom: 1 };
 
-export function SceneMount({ manifest, capability, staticPath, alt, pose, onPoseChange, onContextLost }: SceneMountProps) {
+export function SceneMount({ manifest, capability, staticPath, alt, pose, onPoseChange, onContextLost, model: explicitModel }: SceneMountProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const viewport = useElementSize(frameRef);
   const [view, setView] = useState<CameraView>(pose ? { azimuthDeg: pose.azimuthDeg, polarDeg: pose.polarDeg, zoom: pose.zoom } : DEFAULT_VIEW);
@@ -82,6 +86,9 @@ export function SceneMount({ manifest, capability, staticPath, alt, pose, onPose
   // Idle rotation is a scene-only nicety; a coarse-pointer or reduced-motion device does not get a
   // loop it did not ask for (and never gets here — those cases took the static path upstream).
   const spin = !capability.coarsePointer && !capability.prefersReducedMotion;
+  // The deployment base, so the model resolves under `/`, `/seller/` or `/staff/` alike.
+  const assetBase = (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+  const model = modelForAsset(explicitModel ?? manifest.assetId);
   const calipers: readonly Caliper[] = [];
 
   return (
@@ -97,7 +104,19 @@ export function SceneMount({ manifest, capability, staticPath, alt, pose, onPose
             onContextLost={(info) => onContextLost(info.reason)}
           >
             <LightingRig />
-            <PilotWatchPlaceholder spin={spin} />
+            {/* A captured model when the manifest names one, the procedural placeholder otherwise.
+                Both are inside SceneHost, so capability, byte budget and context-loss handling apply
+                identically to either path. */}
+            {model === null ? (
+              <PilotWatchPlaceholder spin={spin} />
+            ) : (
+              <GltfAsset
+                url={resolveAssetUrl(model, { base: assetBase })}
+                manifest={manifest}
+                alt={alt}
+                reducedMotion={capability.prefersReducedMotion}
+              />
+            )}
             <ViewerControls sceneLabel={alt} claimScope={manifest.claimScope} />
           </SceneHost>
 
